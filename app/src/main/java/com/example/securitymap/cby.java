@@ -10,11 +10,11 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-public class cby1 extends AppCompatActivity{
+public class cby extends AppCompatActivity{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_cby1);
+        setContentView(R.layout.activity_cby);
 
 
         SeekBar floor = (SeekBar) findViewById(R.id.seekBar2);

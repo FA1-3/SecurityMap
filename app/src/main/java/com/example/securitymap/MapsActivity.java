@@ -1,10 +1,13 @@
 package com.example.securitymap;
 
 
+
 import androidx.fragment.app.FragmentActivity;
 
+import android.Manifest;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -17,11 +20,15 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
-public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
+import java.io.InputStream;
+import java.util.ArrayList;
 
+
+public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener//, ActivityCompat.OnRequestPermissionsResultCallback
+{
     private GoogleMap mMap;
 
-//45.425490, -75.689445, 45.418436, -75.675062
+    //45.425490, -75.689445, 45.418436, -75.675062
     private LatLngBounds UOTTAWA = new LatLngBounds(new LatLng(45.418436, -75.689445), new LatLng(45.425490, -75.675062));
 
     @Override
@@ -34,15 +41,6 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         mapFragment.getMapAsync(this);
     }
 
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
     private Marker cbyMarker;
     private Marker steMarker;
     private Marker lprMarker;
@@ -54,6 +52,7 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         mMap.setMapType(mMap.MAP_TYPE_HYBRID);
+
         // 45.425490, -75.689445, 45.418436, -75.675062
         LatLng cby = new LatLng(45.419754, -75.679601);
         LatLng ste = new LatLng(45.419308, -75.678701);
@@ -88,10 +87,24 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         googleMap.setOnMarkerClickListener(this);
     }
 
-    @Override
+        @Override
     public boolean onMarkerClick(Marker marker) {
         if(marker.equals(cbyMarker)) {
-            startActivity(new Intent(this, cby1.class));
+            InputStream inputStream = getResources().openRawResource(R.raw.nodesdata);
+            CSVFile csvFile = new CSVFile();
+            csvFile.inputStream = inputStream;
+            ArrayList<Node> nodesList = new ArrayList<Node>();
+            nodesList = csvFile.read();
+
+            ArrayList<Integer> shortest = new ArrayList<Integer>();
+            Dijkstra calculator = new Dijkstra();
+            shortest = calculator.calculatePath(nodesList, (10-1), (29-1));
+            Log.d("tag1", "\nPath:\n");
+            for(int node: shortest){
+                Log.d("tag1", String.valueOf((int)(node+1))+", ");
+            }
+
+            startActivity(new Intent(this, cby.class));
         }
         if(marker.equals(steMarker)) {
             startActivity(new Intent(this, ste.class));
