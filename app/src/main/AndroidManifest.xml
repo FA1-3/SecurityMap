@@ -15,7 +15,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ste"></activity>
+        <activity android:name=".esti"></activity>
+        <activity android:name=".ste" />
         <activity android:name=".Rating" />
         <activity android:name=".cby" />
         <!--
