@@ -16,3 +16,4 @@ Ce projet s'agit de concevoir une application mobile facilement modifiable qui c
 5. Entrez la commande `git clone <le lien que vous avez copié à l'étape 2>`
 6. Un nouveau dossier portant le nom de ce repository (SecurityMap) contenant le code source sera créé. Entrez la commande `cd SecurityMap`
 7. Pour créer un branch (i.e : Un espace de travail perso pour merge après), entrez `git checkout -b <nom_de_votre_branche>`. Choisissez un nom descriptif et représentatif du feature sur lequel vous voulez travailler.
+8. LOL. merge conflict
