@@ -23,7 +23,7 @@ public class cby extends AppCompatActivity{
     private float mPosX;
     private float mPosY;
     private ScaleGestureDetector mScaleDetector;
-    private ImageView floorPlan;;
+    private ImageView floorPlan;
     private float mScaleFactor=1.0f;
 
     @Override

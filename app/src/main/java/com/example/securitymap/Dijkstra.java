@@ -47,9 +47,7 @@ public class Dijkstra {
         for(int i=1; i<=nodes.get(end).rank; i++){
             shortest.add(nodes.get(shortest.get(i-1)).last);
         }
-
         shortest = reverse(shortest);
-
         return shortest;
     }
 

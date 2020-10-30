@@ -98,7 +98,7 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
 
             ArrayList<Integer> shortest = new ArrayList<Integer>();
             Dijkstra calculator = new Dijkstra();
-            shortest = calculator.calculatePath(nodesList, (10-1), (29-1));
+            shortest = calculator.calculatePath(nodesList, (9), (28));
             Log.d("tag1", "\nPath:\n");
             for(int node: shortest){
                 Log.d("tag1", String.valueOf((int)(node+1))+", ");

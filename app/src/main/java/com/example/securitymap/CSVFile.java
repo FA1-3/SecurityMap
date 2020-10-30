@@ -11,56 +11,68 @@ public class CSVFile {
     InputStream inputStream;
 
     ArrayList<Node> nodes = new ArrayList<Node>();
+    ArrayList<Build> build_names = new ArrayList<Build>();
+    ArrayList<Building> buildings = new ArrayList<Building>();
     Node node;
     Building building;
-    Floor floor;
+    int floor;
     public ArrayList<Node> read(){
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
         try {
             String csvLine;
             while ((csvLine = reader.readLine()) != null) {
-                node = new Node();
-                node.neighbour = new ArrayList<Integer>();
-                node.distance = new ArrayList<Double>();
                 String[] row = csvLine.split(",");
                 int index = Integer.parseInt(row[0]);
                 switch(index){
                     case -1:
-                        building = Building.valueOf(row[1]);
+                        building = new Building();
+                        building.name = Build.valueOf(row[1]);
+                        building.lat1 = Float.parseFloat(row[2]);
+                        building.lng1 = Float.parseFloat(row[3]);
+                        building.lat2 = Float.parseFloat(row[4]);
+                        building.lng2 = Float.parseFloat(row[5]);
+                        building.dist = Double.parseDouble(row[6]);
+                        build_names.add(building.name);
+                        buildings.add(building);
                         break;
                     case -2:
-                        floor = Floor.valueOf(row[1]);
+                        floor = Integer.parseInt(row[1]);
                         break;
                     default:
+                        node = new Node();
+                        node.neighbour = new ArrayList<Integer>();
+                        node.distance = new ArrayList<Double>();
+
                         node.n=index;
-                        node.building=building;
+                        node.building=building.name;
                         node.floor=floor;
+                        node.x=Double.parseDouble(row[1]);
+                        node.y=Double.parseDouble(row[2]);
+
                         node.att = new Attribute[2];
                         node.att[0] = Attribute.NULL;
                         node.att[1] = Attribute.NULL;
-                        if (row[1] != null) {
-                            for(int i=0; i<row[1].length();i++) {
-                                switch (row[1].charAt(i)){
+                        if (row[3] != null) {
+                            for(int i=0; i<row[3].length();i++) {
+                                switch (row[3].charAt(i)){
                                     case 'B':
-                                        node.att[0] = Attribute.BATHROOM;
+                                        node.att[i] = Attribute.BATHROOM;
                                         break;
                                     case 'L':
-                                        node.att[0] = Attribute.ELEVATOR;
+                                        node.att[i] = Attribute.ELEVATOR;
                                         break;
                                     case 'S':
-                                        node.att[0] = Attribute.STAIR;
+                                        node.att[i] = Attribute.STAIR;
                                         break;
                                     case 'X':
-                                        node.att[0] = Attribute.EXIT;
+                                        node.att[i] = Attribute.EXIT;
                                         break;
                                 }
-
                             }
                         }
-
-                        int m=2;
+                        int m=4;
                         while(m<row.length){
-                            node.neighbour.add(Integer.parseInt(row[m])-1);
+                            node.neighbour.add(Integer.parseInt(row[m]));
                             node.distance.add(Double.parseDouble(row[m+1]));
                             m+=2;
                         }
@@ -80,9 +92,6 @@ public class CSVFile {
             catch (IOException e) {
                 throw new RuntimeException("Error while closing input stream: "+e);
             }
-        }
-        for (Node node: nodes) {
-           Log.v("tag", node.toString());
         }
         return nodes;
     }
