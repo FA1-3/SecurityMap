@@ -12,8 +12,9 @@
 
     <ImageView
         android:id="@+id/imageView2"
-        android:layout_width="412dp"
-        android:layout_height="601dp"
+        android:layout_width="392dp"
+        android:layout_height="569dp"
+        android:layout_marginBottom="10dp"
         android:src="@drawable/cby1_1"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

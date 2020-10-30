@@ -1,8 +1,7 @@
 package com.example.securitymap;
 
-import android.util.Log;
-
 import java.util.ArrayList;
+//https://www.baeldung.com/java-dijkstra
 
 public class Dijkstra {
     public int minimum(ArrayList<Node> nodes, ArrayList<Integer> unsettled){

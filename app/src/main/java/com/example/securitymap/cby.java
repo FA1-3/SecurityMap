@@ -1,8 +1,16 @@
 package com.example.securitymap;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.res.ResourcesCompat;
 
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -29,12 +37,55 @@ public class cby extends AppCompatActivity{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d("draw", "-1");
         setContentView(R.layout.activity_cby);
-
+        Log.v("draw", "0");
         mScaleDetector = new ScaleGestureDetector(this, new cby.ScaleListener());
         floorPlan = (ImageView)findViewById(R.id.imageView2);
         mPosX = floorPlan.getX();
         mPosX = floorPlan.getY();
+        //BitmapFactory.Options options = new BitmapFactory.Options();
+        //options.inJustDecodeBounds = true;
+        Log.d("draw", "1");
+        //https://stackoverflow.com/questions/7501863/android-bitmapfactory-decoderesource-returning-null/32099786
+        Bitmap myBitmap = BitmapFactory.decodeResource(this.getResources(), R.drawable.ste0_1);//, options);
+        Paint myPaint = new Paint();
+        myPaint.setColor(Color.WHITE);
+        myPaint.setAntiAlias(true);
+        myPaint.setStrokeWidth(1);
+        myPaint.setStyle(Paint.Style.STROKE);
+        myPaint.setStrokeJoin(Paint.Join.ROUND);
+        myPaint.setStrokeCap(Paint.Cap.ROUND);
+
+        float x1 = 10;
+        float y1 = 10;
+        float x2 = 20;
+        float y2 = 20;
+        Log.d("draw", "lol");
+        //https://stackoverflow.com/questions/4918079/android-drawing-a-canvas-to-an-imageview
+        //https://developer.android.com/reference/android/graphics/Bitmap
+        Bitmap tempBitmap = Bitmap.createBitmap(392, 569, Bitmap.Config.RGB_565);
+        Log.d("draw", "2");
+        Log.d("draw", "4");
+        Canvas tempCanvas = new Canvas(tempBitmap);
+        Log.d("draw", "3");
+        //https://developer.android.com/topic/performance/graphics
+        Bitmap compBitMap = Bitmap.createScaledBitmap(myBitmap, myBitmap.getScaledWidth(tempCanvas), myBitmap.getScaledHeight(tempCanvas), true);
+//Draw the image bitmap into the canvas
+        //tempCanvas.drawColor(Color.TRANSPARENT);
+        Log.d("draw", "yo");
+        tempCanvas.drawBitmap(compBitMap, null, new Rect(0, 0, 392, 569), null);
+
+//Draw everything else you want into the canvas, in this example a rectangle with rounded edges
+        tempCanvas.drawLine(x1, y1, x2, y2, myPaint);
+
+//Attach the canvas to the ImageView
+        floorPlan.setImageDrawable(new BitmapDrawable(getResources(), tempBitmap));
+
+
+
+
+
 
         SeekBar floor = (SeekBar) findViewById(R.id.seekBar2);
         final TextView floorText = (TextView)findViewById(R.id.textView4);

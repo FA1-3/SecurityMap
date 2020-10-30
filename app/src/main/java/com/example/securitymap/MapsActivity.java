@@ -90,7 +90,7 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         @Override
     public boolean onMarkerClick(Marker marker) {
         if(marker.equals(cbyMarker)) {
-            /*InputStream inputStream = getResources().openRawResource(R.raw.nodesdata);
+            InputStream inputStream = getResources().openRawResource(R.raw.nodesdata);
             CSVFile csvFile = new CSVFile();
             csvFile.inputStream = inputStream;
             ArrayList<Node> nodesList = new ArrayList<Node>();
@@ -101,9 +101,8 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
             shortest = calculator.calculatePath(nodesList, (9), (28));
             Log.d("tag1", "\nPath:\n");
             for(int node: shortest){
-                Log.d("tag1", String.valueOf((int)(node+1))+", ");
-            }*/
-            Log.d("wtf", "yo");
+                Log.d("tag1", (node+1)+", ");
+            }
             startActivity(new Intent(this, cby.class));
         }
         if(marker.equals(steMarker)) {
