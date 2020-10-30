@@ -12,8 +12,8 @@ public class CSVFile {
 
     ArrayList<Node> nodes = new ArrayList<Node>();
     Node node;
-    String building;
-    String floor;
+    Building building;
+    Floor floor;
     public ArrayList<Node> read(){
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
         try {
@@ -26,40 +26,38 @@ public class CSVFile {
                 int index = Integer.parseInt(row[0]);
                 switch(index){
                     case -1:
-                        building = row[1];
+                        building = Building.valueOf(row[1]);
                         break;
                     case -2:
-                        floor = row[1];
+                        floor = Floor.valueOf(row[1]);
                         break;
                     default:
-                        node.n=index-1;
+                        node.n=index;
                         node.building=building;
                         node.floor=floor;
-                        switch(row[1]) {
-                            case "Exit":
-                                node.exit=true;
-                                break;
-                            case "Stair":
-                                node.stair=true;
-                                break;
-                            case "Elevator":
-                                node.elevator=true;
-                                break;
-                            case "BathM":
-                                node.bath='M';
-                                break;
-                            case "BathF":
-                                node.bath='F';
-                                break;
-                            default:
-                                if(row[1]==null)
-                                    break;
-                                if(row[1].contains("Tunnel")) {
-                                    node.tunnel=row[1].substring(6);
-                                    break;
+                        node.att = new Attribute[2];
+                        node.att[0] = Attribute.NULL;
+                        node.att[1] = Attribute.NULL;
+                        if (row[1] != null) {
+                            for(int i=0; i<row[1].length();i++) {
+                                switch (row[1].charAt(i)){
+                                    case 'B':
+                                        node.att[0] = Attribute.BATHROOM;
+                                        break;
+                                    case 'L':
+                                        node.att[0] = Attribute.ELEVATOR;
+                                        break;
+                                    case 'S':
+                                        node.att[0] = Attribute.STAIR;
+                                        break;
+                                    case 'X':
+                                        node.att[0] = Attribute.EXIT;
+                                        break;
                                 }
-                                break;
+
+                            }
                         }
+
                         int m=2;
                         while(m<row.length){
                             node.neighbour.add(Integer.parseInt(row[m])-1);
