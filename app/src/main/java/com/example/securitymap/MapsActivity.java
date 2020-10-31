@@ -2,12 +2,14 @@ package com.example.securitymap;
 
 
 
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.FragmentActivity;
 
 import android.Manifest;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.RelativeLayout;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -23,10 +25,11 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import java.io.InputStream;
 import java.util.ArrayList;
 
-
 public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener//, ActivityCompat.OnRequestPermissionsResultCallback
 {
     private GoogleMap mMap;
+    static int width;
+    static int height;
 
     //45.425490, -75.689445, 45.418436, -75.675062
     private LatLngBounds UOTTAWA = new LatLngBounds(new LatLng(45.418436, -75.689445), new LatLng(45.425490, -75.675062));
@@ -52,6 +55,9 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         mMap.setMapType(mMap.MAP_TYPE_HYBRID);
+        RelativeLayout layout = (RelativeLayout) findViewById(R.id.relative);
+        width = layout.getWidth();
+        height = layout.getHeight();
 
         // 45.425490, -75.689445, 45.418436, -75.675062
         LatLng cby = new LatLng(45.419754, -75.679601);

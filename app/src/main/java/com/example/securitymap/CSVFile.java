@@ -27,13 +27,15 @@ public class CSVFile {
                     case -1:
                         building = new Building();
                         building.name = Build.valueOf(row[1]);
-                        building.lat1 = Float.parseFloat(row[2]);
-                        building.lng1 = Float.parseFloat(row[3]);
-                        building.lat2 = Float.parseFloat(row[4]);
-                        building.lng2 = Float.parseFloat(row[5]);
-                        building.dist = Double.parseDouble(row[6]);
-                        build_names.add(building.name);
-                        buildings.add(building);
+                        if(!build_names.contains(building.name)) {
+                            building.lat1 = Float.parseFloat(row[2]);
+                            building.lng1 = Float.parseFloat(row[3]);
+                            building.lat2 = Float.parseFloat(row[4]);
+                            building.lng2 = Float.parseFloat(row[5]);
+                            building.dist = Double.parseDouble(row[6]);
+                            build_names.add(building.name);
+                            buildings.add(building);
+                        }
                         break;
                     case -2:
                         floor = Integer.parseInt(row[1]);
