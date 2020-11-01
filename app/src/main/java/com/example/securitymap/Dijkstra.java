@@ -4,6 +4,8 @@ import java.util.ArrayList;
 //https://www.baeldung.com/java-dijkstra
 
 public class Dijkstra {
+    private ArrayList<Integer> shortest;
+
     public int minimum(ArrayList<Node> nodes, ArrayList<Integer> unsettled){
         double minimum = nodes.get(unsettled.get(0)).d;
         int index=0;
@@ -16,10 +18,10 @@ public class Dijkstra {
         return index;
     }
 
-    public ArrayList<Integer> calculatePath(ArrayList<Node> nodes, int start, int end){
+    public void calculatePath(ArrayList<Node> nodes, int start, int end){
         ArrayList<Integer> settled = new ArrayList<Integer>();
         ArrayList<Integer> unsettled = new ArrayList<Integer>();
-        ArrayList<Integer> shortest = new ArrayList<Integer>();
+        shortest = new ArrayList<Integer>();
         for (Node var:nodes) {
             var.d = 100000000;
             var.rank=0;
@@ -47,7 +49,6 @@ public class Dijkstra {
             shortest.add(nodes.get(shortest.get(i-1)).last);
         }
         shortest = reverse(shortest);
-        return shortest;
     }
 
     private ArrayList<Integer> reverse(ArrayList<Integer> array1) {
@@ -58,4 +59,7 @@ public class Dijkstra {
         return array2;
     }
 
+    public ArrayList<Integer> getPath() {
+        return shortest;
+    }
 }

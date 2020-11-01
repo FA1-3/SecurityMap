@@ -30,6 +30,7 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
     private GoogleMap mMap;
     static int width;
     static int height;
+    static ArrayList<Node> nodesList;
 
     //45.425490, -75.689445, 45.418436, -75.675062
     private LatLngBounds UOTTAWA = new LatLngBounds(new LatLng(45.418436, -75.689445), new LatLng(45.425490, -75.675062));
@@ -90,29 +91,46 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
 // Get back the mutable Polyline
         Polyline polyline = mMap.addPolyline(polylineOptions);
         */
+
+        InputStream inputStream = getResources().openRawResource(R.raw.nodesdata);
+        CSVFile csvFile = new CSVFile();
+        csvFile.inputStream = inputStream;
+        csvFile.read();
+        nodesList = new ArrayList<Node>();
+        nodesList = csvFile.getNodes();
         googleMap.setOnMarkerClickListener(this);
     }
 
         @Override
     public boolean onMarkerClick(Marker marker) {
         if(marker.equals(cbyMarker)) {
-            InputStream inputStream = getResources().openRawResource(R.raw.nodesdata);
-            CSVFile csvFile = new CSVFile();
-            csvFile.inputStream = inputStream;
-            ArrayList<Node> nodesList = new ArrayList<Node>();
-            nodesList = csvFile.read();
-
             ArrayList<Integer> shortest = new ArrayList<Integer>();
             Dijkstra calculator = new Dijkstra();
-            shortest = calculator.calculatePath(nodesList, (9), (28));
+            calculator.calculatePath(nodesList, (9), (28));
+            shortest = calculator.getPath();
             Log.d("tag1", "\nPath:\n");
             for(int node: shortest){
                 Log.d("tag1", (node+1)+", ");
             }
-            startActivity(new Intent(this, cby.class));
+            /*static void drawPath(ArrayList<Integer> path, ArrayList<Node> nodes){
+                int i=1;
+                ArrayList<Float> pts = new ArrayList<Float>;
+                while(nodes.get(path.get(i-1)).building==nodes.get(path.get(i)).building && nodes.get(path.get(i-1)).floor==nodes.get(path.get(i)).floor&&i<path.size()){
+                    pts.add(Float.parseFloat());
+                    i++;
+                }
+            }*/
+            Intent intent = new Intent(this, cby.class);
+            String str = "CBY";
+            intent.putExtra("key", str);
+            startActivity(intent);
         }
         if(marker.equals(steMarker)) {
-            startActivity(new Intent(this, ste.class));
+            Intent intent = new Intent(this, cby.class);
+            String str = "STE";
+            intent.putExtra("key", str);
+            startActivity(intent);
+            startActivity(intent);
         }
         return false;
 
