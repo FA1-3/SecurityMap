@@ -10,5 +10,5 @@ public class Building {
     public float lng2;
     public double dist;
 
-    public ArrayList<String> floors;
+    public ArrayList<Floor> floors;
 }

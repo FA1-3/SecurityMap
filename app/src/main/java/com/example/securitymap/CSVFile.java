@@ -19,7 +19,7 @@ public class CSVFile {
     static ArrayList<Building> buildings = new ArrayList<Building>();
     Node node;
     Building building;
-    int floor;
+    Floor floor;
     public void read(){
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
         try {
@@ -37,14 +37,20 @@ public class CSVFile {
                             building.lat2 = Float.parseFloat(row[4]);
                             building.lng2 = Float.parseFloat(row[5]);
                             building.dist = Double.parseDouble(row[6]);
-                            building.floors = new ArrayList<String>();
+                            building.floors = new ArrayList<Floor>();
                             buildNames.add(building.name);
                             buildings.add(building);
                         }
                         break;
                     case -2:
-                        floor = Integer.parseInt(row[1]);
-                        //buildings.get(buildings.size()-1).floors.add(row[2]);
+                        floor = new Floor();
+                        floor.num = Integer.parseInt(row[1]);
+                        floor.name = row[2];
+                        floor.width = Double.parseDouble(row[3]);
+                        floor.height = Double.parseDouble(row[4]);
+                        floor.ox = Double.parseDouble(row[5]);
+                        floor.oy = Double.parseDouble(row[6]);
+                        buildings.get(buildings.size()-1).floors.add(floor);
                         break;
                     default:
                         node = new Node();
@@ -53,7 +59,7 @@ public class CSVFile {
 
                         node.n=index;
                         node.building=building.name;
-                        node.floor=floor;
+                        node.floor=floor.num;
                         node.x=Double.parseDouble(row[1]);
                         node.y=Double.parseDouble(row[2]);
 

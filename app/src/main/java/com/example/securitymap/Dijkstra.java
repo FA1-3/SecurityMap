@@ -1,10 +1,13 @@
 package com.example.securitymap;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 //https://www.baeldung.com/java-dijkstra
 
 public class Dijkstra {
     private ArrayList<Integer> shortest;
+    private ArrayList<Double> distances;
 
     public int minimum(ArrayList<Node> nodes, ArrayList<Integer> unsettled){
         double minimum = nodes.get(unsettled.get(0)).d;
@@ -18,10 +21,18 @@ public class Dijkstra {
         return index;
     }
 
+    private ArrayList<Integer> reverse(ArrayList<Integer> array1) {
+        ArrayList<Integer> array2 = new ArrayList<Integer>();
+        for (int i=array1.size()-1; i>=0; i--){
+            array2.add(array1.get(i));
+        }
+        return array2;
+    }
+
     public void calculatePath(ArrayList<Node> nodes, int start, int end){
-        ArrayList<Integer> settled = new ArrayList<Integer>();
-        ArrayList<Integer> unsettled = new ArrayList<Integer>();
-        shortest = new ArrayList<Integer>();
+        ArrayList<Integer> settled = new ArrayList<>();
+        ArrayList<Integer> unsettled = new ArrayList<>();
+        shortest = new ArrayList<>();
         for (Node var:nodes) {
             var.d = 100000000;
             var.rank=0;
@@ -35,7 +46,7 @@ public class Dijkstra {
             for (int i=0; i<nodes.get(eval).neighbour.size(); i++) {
                 if((!settled.contains(nodes.get(eval).neighbour.get(i))) &&
                         (nodes.get(eval).d + nodes.get(eval).distance.get(i) < nodes.get(nodes.get(eval).neighbour.get(i)).d) &&
-                        (nodes.get(eval).d + nodes.get(eval).distance.get(i) < nodes.get(end).d)){
+                        (nodes.get(eval).d + nodes.get(eval).distance.get(i) < nodes.get(end).d))   {
                     nodes.get(nodes.get(eval).neighbour.get(i)).d = nodes.get(eval).d + nodes.get(eval).distance.get(i);
                     nodes.get(nodes.get(eval).neighbour.get(i)).last = eval;
                     nodes.get(nodes.get(eval).neighbour.get(i)).rank = nodes.get(eval).rank + 1;
@@ -47,16 +58,9 @@ public class Dijkstra {
         shortest.add(end);
         for(int i=1; i<=nodes.get(end).rank; i++){
             shortest.add(nodes.get(shortest.get(i-1)).last);
+            Log.d("dist", String.valueOf(nodes.get(shortest.get(i-1)).d));
         }
         shortest = reverse(shortest);
-    }
-
-    private ArrayList<Integer> reverse(ArrayList<Integer> array1) {
-        ArrayList<Integer> array2 = new ArrayList<Integer>();
-        for (int i=array1.size()-1; i>=0; i--){
-            array2.add(array1.get(i));
-        }
-        return array2;
     }
 
     public ArrayList<Integer> getPath() {
