@@ -17,9 +17,11 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+
 import static android.view.MotionEvent.INVALID_POINTER_ID;
 
-public class cby extends AppCompatActivity{
+public class cby extends AppCompatActivity {
     private int mActivePointerId = INVALID_POINTER_ID;
     private float mLastTouchX;
     private float mLastTouchY;
@@ -28,17 +30,95 @@ public class cby extends AppCompatActivity{
     private ScaleGestureDetector mScaleDetector;
     private ImageView floorPlan;
     private float mScaleFactor=1.0f;
+    private String build;
+    private Building building;
+    private ArrayList<Build> buildNames;
+    private ArrayList<Building> buildings;
+    private ArrayList<Node> nodes;
+    private ArrayList<Bitmap> floorBitmaps = new ArrayList<Bitmap>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d("draw", "-1");
         setContentView(R.layout.activity_cby);
+        build = getIntent().getStringExtra("key");
         Log.v("draw", "0");
         mScaleDetector = new ScaleGestureDetector(this, new cby.ScaleListener());
         floorPlan = (ImageView)findViewById(R.id.imageView2);
         mPosX = floorPlan.getX();
         mPosX = floorPlan.getY();
+        CSVFile csvFile = new CSVFile();
+        buildNames = csvFile.getBuildNames();
+        buildings = csvFile.getBuildings();
+        nodes = csvFile.getNodes();
+        Log.d("build", "allo");
+        Log.d("build", build);
+        Build b = Build.valueOf(build);
+        building = buildings.get(buildNames.indexOf(b));
+
+        //temporary:
+        building.floors = new ArrayList<String>();
+        building.floors.add("Basement");
+        building.floors.add("Floor 1 (Ground Level)");
+        building.floors.add("Floor 2");
+        building.floors.add("Floor 3");
+        building.floors.add("Floor 4");
+        building.floors.add("Floor 5");
+
+
+        SeekBar floor = (SeekBar) findViewById(R.id.seekBar2);
+        floor.setMax(building.floors.size());
+        final TextView floorText = (TextView)findViewById(R.id.textView4);
+        floorText.setText(building.floors.get(1));
+        final TextView buildingText = (TextView)findViewById(R.id.textView2);
+        buildingText.setText(build);
+        Paint myPaint = new Paint();
+        myPaint.setColor(Color.RED);
+        myPaint.setAntiAlias(true);
+        myPaint.setStrokeWidth(3);
+        myPaint.setStyle(Paint.Style.STROKE);
+        myPaint.setStrokeJoin(Paint.Join.ROUND);
+        myPaint.setStrokeCap(Paint.Cap.ROUND);
+
+        for(int i=0; i<building.floors.size(); i++){
+            String imageName = build.toString().toLowerCase()+i;
+            int id = getResources().getIdentifier(imageName, "drawable",  getPackageName());
+            floorPlan.setImageResource(id);
+            Bitmap myBitmap = ((BitmapDrawable)floorPlan.getDrawable()).getBitmap();
+            //Bitmap compBitmap = Bitmap.createScaledBitmap(myBitmap, myBitmap.getWidth()*2, myBitmap.getHeight()*2, true);
+            Bitmap tempBitmap = Bitmap.createBitmap(myBitmap.getWidth()*2, myBitmap.getHeight()*2, Bitmap.Config.RGB_565);
+            Canvas tempCanvas = new Canvas(tempBitmap);
+            tempCanvas.drawBitmap(myBitmap, null, new Rect(0, 0, myBitmap.getWidth()*2, myBitmap.getHeight()*2), null);
+            //tempCanvas.drawLine(x1, y1, x2, y2, myPaint);
+            floorBitmaps.add(tempBitmap);
+        }
+
+
+        floor.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar floor, int progress, boolean fromUser) {
+                floorPlan.setImageDrawable(new BitmapDrawable(getResources(), floorBitmaps.get(progress)));
+                floorText.setText(building.floors.get(progress));
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
+        });
+
+        ImageButton back = (ImageButton) findViewById(R.id.imageButton);
+        back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
 
         //Display display = ((WindowManager)getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
 
@@ -47,7 +127,7 @@ public class cby extends AppCompatActivity{
         //https://stackoverflow.com/questions/7501863/android-bitmapfactory-decoderesource-returning-null/32099786
         //https://stackoverflow.com/questions/15255611/how-to-convert-a-drawable-image-from-resources-to-a-bitmap  (alternative for drawable --> bitmap)
         //floorPlan.setImageResource(R.drawable.ste0_1);
-        Bitmap myBitmap = ((BitmapDrawable)floorPlan.getDrawable()).getBitmap();
+        /*Bitmap myBitmap = ((BitmapDrawable)floorPlan.getDrawable()).getBitmap();
         //Bitmap myBitmap = BitmapFactory.decodeResource(this.getResources(), R.drawable.ste0_1);//, options);
         Paint myPaint = new Paint();
         myPaint.setColor(Color.RED);
@@ -72,68 +152,7 @@ public class cby extends AppCompatActivity{
 //Draw everything else you want into the canvas, in this example a rectangle with rounded edges
         tempCanvas.drawLine(x1, y1, x2, y2, myPaint);
 //Attach the canvas to the ImageView
-        floorPlan.setImageDrawable(new BitmapDrawable(getResources(), tempBitmap));
-
-
-        SeekBar floor = (SeekBar) findViewById(R.id.seekBar2);
-        final TextView floorText = (TextView)findViewById(R.id.textView4);
-        floorText.setText("Floor 1 (Ground Level)");
-
-        floor.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-
-            @Override
-            public void onProgressChanged(SeekBar floor, int progress, boolean fromUser) {
-                switch (floor.getProgress()) {
-                    case 0:
-                        floorPlan.setImageResource(R.drawable.cby0_1);// code block
-                        floorText.setText("Basement");
-                        break;
-                    case 1:
-                        floorPlan.setImageResource(R.drawable.cby1_1);// code block
-                        floorText.setText("Floor 1 (Ground Level)");
-                        break;
-                    case 2:
-                        floorPlan.setImageResource(R.drawable.cby2_1);// code block
-                        floorText.setText("Floor 2");
-                        break;
-                    case 3:
-                        floorPlan.setImageResource(R.drawable.cby3_1);// code block
-                        floorText.setText("Floor 3");
-                        break;
-                    case 4:
-                        floorPlan.setImageResource(R.drawable.cby4_1);// code block
-                        floorText.setText("Floor 4");
-                        break;
-                    case 5:
-                        floorPlan.setImageResource(R.drawable.cby5_1);// code block
-                        floorText.setText("Floor 5");
-                        break;
-                    case 6:
-                        floorPlan.setImageResource(R.drawable.cby6_1);// code block
-                        floorText.setText("Floor 6");
-                        break;
-                    default:
-                        // code block
-                }
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-            }
-        });
-
-        ImageButton back = (ImageButton) findViewById(R.id.imageButton);
-        back.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
+        floorPlan.setImageDrawable(new BitmapDrawable(getResources(), tempBitmap));*/
     }
 
 

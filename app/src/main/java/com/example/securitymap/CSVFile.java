@@ -1,4 +1,8 @@
 package com.example.securitymap;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
 import android.util.Log;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -10,13 +14,13 @@ import java.util.ArrayList;
 public class CSVFile {
     InputStream inputStream;
 
-    ArrayList<Node> nodes = new ArrayList<Node>();
-    ArrayList<Build> build_names = new ArrayList<Build>();
-    ArrayList<Building> buildings = new ArrayList<Building>();
+    static ArrayList<Node> nodes = new ArrayList<Node>();
+    static ArrayList<Build> buildNames = new ArrayList<Build>();
+    static ArrayList<Building> buildings = new ArrayList<Building>();
     Node node;
     Building building;
     int floor;
-    public ArrayList<Node> read(){
+    public void read(){
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
         try {
             String csvLine;
@@ -27,18 +31,20 @@ public class CSVFile {
                     case -1:
                         building = new Building();
                         building.name = Build.valueOf(row[1]);
-                        if(!build_names.contains(building.name)) {
+                        if(!buildNames.contains(building.name)) {
                             building.lat1 = Float.parseFloat(row[2]);
                             building.lng1 = Float.parseFloat(row[3]);
                             building.lat2 = Float.parseFloat(row[4]);
                             building.lng2 = Float.parseFloat(row[5]);
                             building.dist = Double.parseDouble(row[6]);
-                            build_names.add(building.name);
+                            building.floors = new ArrayList<String>();
+                            buildNames.add(building.name);
                             buildings.add(building);
                         }
                         break;
                     case -2:
                         floor = Integer.parseInt(row[1]);
+                        //buildings.get(buildings.size()-1).floors.add(row[2]);
                         break;
                     default:
                         node = new Node();
@@ -74,6 +80,7 @@ public class CSVFile {
                         }
                         int m=4;
                         while(m<row.length){
+                            Log.d("csv", index+", "+m);
                             node.neighbour.add(Integer.parseInt(row[m]));
                             node.distance.add(Double.parseDouble(row[m+1]));
                             m+=2;
@@ -95,6 +102,25 @@ public class CSVFile {
                 throw new RuntimeException("Error while closing input stream: "+e);
             }
         }
+    }
+
+    public static Bitmap drawablesToBitmaps(Bitmap myBitmap){
+        Bitmap tempBitmap = Bitmap.createBitmap(myBitmap.getWidth()*2, myBitmap.getHeight()*2, Bitmap.Config.RGB_565);
+        Canvas tempCanvas = new Canvas(tempBitmap);
+        tempCanvas.drawBitmap(myBitmap, null, new Rect(0, 0, myBitmap.getWidth()*2, myBitmap.getHeight()*2), null);
+        //tempCanvas.drawLine(x1, y1, x2, y2, myPaint);
+        return tempBitmap;
+    }
+
+    public static ArrayList<Build> getBuildNames() {
+        return buildNames;
+    }
+
+    public static ArrayList<Building> getBuildings() {
+        return buildings;
+    }
+
+    public static ArrayList<Node> getNodes() {
         return nodes;
     }
 }
