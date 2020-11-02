@@ -104,13 +104,13 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         @Override
     public boolean onMarkerClick(Marker marker) {
         if(marker.equals(cbyMarker)) {
-            Intent intent = new Intent(this, cby.class);
+            Intent intent = new Intent(this, Indoor.class);
             String str = "CBY";
             intent.putExtra("key", str);
             startActivity(intent);
         }
         if(marker.equals(steMarker)) {
-            Intent intent = new Intent(this, cby.class);
+            Intent intent = new Intent(this, Indoor.class);
             String str = "STE";
             intent.putExtra("key", str);
             startActivity(intent);
