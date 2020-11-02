@@ -1,16 +1,12 @@
 package com.example.securitymap;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -25,7 +21,7 @@ import java.util.ArrayList;
 
 import static android.view.MotionEvent.INVALID_POINTER_ID;
 
-public class cby extends AppCompatActivity {
+public class Indoor extends AppCompatActivity {
     private int mActivePointerId = INVALID_POINTER_ID;
     private float mLastTouchX;
     private float mLastTouchY;
@@ -33,6 +29,7 @@ public class cby extends AppCompatActivity {
     private float mPosY;
     private ScaleGestureDetector mScaleDetector;
     private ImageView floorPlan;
+    private ImageView pathImage;
     private float mScaleFactor=1.0f;
     private String build;
     private Building building;
@@ -46,11 +43,12 @@ public class cby extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d("draw", "-1");
-        setContentView(R.layout.activity_cby);
+        setContentView(R.layout.activity_indoor);
         build = getIntent().getStringExtra("key");
         Log.v("draw", "0");
-        mScaleDetector = new ScaleGestureDetector(this, new cby.ScaleListener());
+        mScaleDetector = new ScaleGestureDetector(this, new Indoor.ScaleListener());
         floorPlan = (ImageView)findViewById(R.id.imageView2);
+        pathImage = (ImageView)findViewById(R.id.imageView);
         mPosX = floorPlan.getX();
         mPosX = floorPlan.getY();
         buildNames = CSVFile.getBuildNames();
@@ -92,50 +90,41 @@ public class cby extends AppCompatActivity {
         myPaint.setStrokeCap(Paint.Cap.ROUND);
 
         Dijkstra calculator = new Dijkstra();
-        calculator.calculatePath(nodes, 42, 52);
+        calculator.calculatePath(nodes, 5, 41);
         path = calculator.getPath();
         Log.d("tag1", "\nPath:\n");
         for(int i=0; i<path.size(); i++){
             Log.d("tag1", String.valueOf(path.get(i)));
         }
 
-        /*Drawable vectorDrawable = VectorDrawableCompat.create(getResources(), R.drawable.logo,  getContext().getTheme());
-        Bitmap myLogo = ((BitmapDrawable) vectorDrawable).getBitmap();
-
-        Drawable drawable = getResources().getDrawable(R.drawable.input);
-        Bitmap bitmap = ((BitmapDrawable)drawable).getBitmap();
-
-        Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.my_drawable);*/
-        //final BitmapFactory.Options mBitmapOptions = new BitmapFactory.Options();
-        //mBitmapOptions.inSampleSize = 4;
-        //mBitmapOptions.inJustDecodeBounds = true;
-        //BitmapFactory.decodeFile
         for(int i=0; i<building.floors.size(); i++){
-            String imageName = build.toLowerCase()+i;
-            int id = getResources().getIdentifier(imageName, "drawable",  getPackageName());
-            floorPlan.setImageResource(id);
-            Bitmap myBitmap = ((BitmapDrawable)floorPlan.getDrawable()).getBitmap();
-            //Bitmap compBitmap = Bitmap.createScaledBitmap(myBitmap, myBitmap.getWidth()*2, myBitmap.getHeight()*2, true);
-            Bitmap tempBitmap = Bitmap.createBitmap(myBitmap.getWidth()*2, myBitmap.getHeight()*2, Bitmap.Config.RGB_565);
+            Floor tempFloor = building.floors.get(i);
+            double ratio = 1500/tempFloor.width;
+            Bitmap tempBitmap = Bitmap.createBitmap(1500, (int)(ratio*tempFloor.height), Bitmap.Config.ARGB_8888);
+            tempBitmap.eraseColor(Color.TRANSPARENT);
+            tempBitmap.setHasAlpha(true);
             Canvas tempCanvas = new Canvas(tempBitmap);
-            tempCanvas.drawBitmap(myBitmap, null, new Rect(0, 0, myBitmap.getWidth()*2, myBitmap.getHeight()*2), null);
             for (int k=0; k<path.size()-1; k++) {
                 if(nodes.get(path.get(k)).building == Build.valueOf(build)){
                     if(nodes.get(path.get(k)).floor == nodes.get(path.get(k+1)).floor && nodes.get(path.get(k)).floor == i) {
-                        Floor tempFloor = building.floors.get(nodes.get(path.get(k)).floor);
-                        double ratio = myBitmap.getWidth()*2/tempFloor.width;
                         tempCanvas.drawLine((int)(ratio*(nodes.get(path.get(k)).x + tempFloor.ox)), (int)(ratio*(tempFloor.height - nodes.get(path.get(k)).y - tempFloor.oy)), (int)(ratio*(nodes.get(path.get(k+1)).x + tempFloor.ox)), (int)(ratio*(tempFloor.height - nodes.get(path.get(k+1)).y - tempFloor.oy)), myPaint);
                     }
                 }
             }
             floorBitmaps.add(tempBitmap);
         }
-        floorPlan.setImageDrawable(new BitmapDrawable(getResources(), floorBitmaps.get(1)));
+        String imageName = build.toLowerCase()+"1";
+        int id = getResources().getIdentifier(imageName, "drawable",  getPackageName());
+        floorPlan.setImageResource(id);
+        pathImage.setImageDrawable(new BitmapDrawable(getResources(), floorBitmaps.get(1)));
 
         floor.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar floor, int progress, boolean fromUser) {
-                floorPlan.setImageDrawable(new BitmapDrawable(getResources(), floorBitmaps.get(progress)));
+                String imageName = build.toLowerCase()+progress;
+                int id = getResources().getIdentifier(imageName, "drawable",  getPackageName());
+                floorPlan.setImageResource(id);
+                pathImage.setImageDrawable(new BitmapDrawable(getResources(), floorBitmaps.get(progress)));
                 floorText.setText(building.floors.get(progress).name);
             }
 
@@ -206,6 +195,8 @@ public class cby extends AppCompatActivity {
 
             floorPlan.setScaleX(mScaleFactor);
             floorPlan.setScaleY(mScaleFactor);
+            pathImage.setScaleX(mScaleFactor);
+            pathImage.setScaleY(mScaleFactor);
             return true;
         }
     }
@@ -249,6 +240,8 @@ public class cby extends AppCompatActivity {
                 //mPosY = Math.max(1.0f, Math.min(mScaleFactor, 5.0f));
                 floorPlan.setX(mPosX);
                 floorPlan.setY(mPosY);
+                pathImage.setX(mPosX);
+                pathImage.setY(mPosY);
 
                 // Remember this touch position for the next move event
                 mLastTouchX = x;
