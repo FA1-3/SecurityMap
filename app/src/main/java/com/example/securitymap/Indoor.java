@@ -105,7 +105,7 @@ public class Indoor extends AppCompatActivity {
             tempBitmap.setHasAlpha(true);
             Canvas tempCanvas = new Canvas(tempBitmap);
             for (int k=0; k<path.size()-1; k++) {
-                if(nodes.get(path.get(k)).building == Build.valueOf(build)){
+                if(nodes.get(path.get(k)).building == Build.valueOf(build) && nodes.get(path.get(k)).building == nodes.get(path.get(k+1)).building){
                     if(nodes.get(path.get(k)).floor == nodes.get(path.get(k+1)).floor && nodes.get(path.get(k)).floor == i) {
                         tempCanvas.drawLine((int)(ratio*(nodes.get(path.get(k)).x + tempFloor.ox)), (int)(ratio*(tempFloor.height - nodes.get(path.get(k)).y - tempFloor.oy)), (int)(ratio*(nodes.get(path.get(k+1)).x + tempFloor.ox)), (int)(ratio*(tempFloor.height - nodes.get(path.get(k+1)).y - tempFloor.oy)), myPaint);
                     }
