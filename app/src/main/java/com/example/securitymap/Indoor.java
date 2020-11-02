@@ -90,7 +90,7 @@ public class Indoor extends AppCompatActivity {
         myPaint.setStrokeCap(Paint.Cap.ROUND);
 
         Dijkstra calculator = new Dijkstra();
-        calculator.calculatePath(nodes, 5, 41);
+        calculator.calculatePath(nodes, 5, 55);
         path = calculator.getPath();
         Log.d("tag1", "\nPath:\n");
         for(int i=0; i<path.size(); i++){
@@ -113,10 +113,12 @@ public class Indoor extends AppCompatActivity {
             }
             floorBitmaps.add(tempBitmap);
         }
-        String imageName = build.toLowerCase()+"1";
+        String imageName = build.toLowerCase()+nodes.get(path.get(0)).floor;
         int id = getResources().getIdentifier(imageName, "drawable",  getPackageName());
         floorPlan.setImageResource(id);
-        pathImage.setImageDrawable(new BitmapDrawable(getResources(), floorBitmaps.get(1)));
+        pathImage.setImageDrawable(new BitmapDrawable(getResources(), floorBitmaps.get(nodes.get(path.get(0)).floor)));
+        floor.setProgress(nodes.get(path.get(0)).floor);
+        floorText.setText(building.floors.get(nodes.get(path.get(0)).floor).name);
 
         floor.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override

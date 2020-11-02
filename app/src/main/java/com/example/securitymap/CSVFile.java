@@ -2,7 +2,6 @@ package com.example.securitymap;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Rect;
-import android.graphics.drawable.BitmapDrawable;
 import android.util.Log;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -15,7 +14,7 @@ public class CSVFile {
     InputStream inputStream;
 
     static ArrayList<Node> nodes = new ArrayList<Node>();
-    static ArrayList<Build> buildNames = new ArrayList<Build>();
+    static ArrayList buildNames = new ArrayList<Build>();
     static ArrayList<Building> buildings = new ArrayList<Building>();
     Node node;
     Building building;
@@ -118,7 +117,7 @@ public class CSVFile {
         return tempBitmap;
     }
 
-    public static ArrayList<Build> getBuildNames() {
+    public static ArrayList<com.example.securitymap.Build> getBuildNames() {
         return buildNames;
     }
 
