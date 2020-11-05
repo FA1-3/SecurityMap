@@ -23,11 +23,13 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 
-public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener//, ActivityCompat.OnRequestPermissionsResultCallback
+public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener, TaskLoadedCallback//, ActivityCompat.OnRequestPermissionsResultCallback
 {
     private GoogleMap mMap;
+
     static int width;
     static int height;
 
@@ -42,6 +44,8 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+
     }
 
     private Marker cbyMarker;
@@ -50,6 +54,11 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
     private Marker hsMarker;
     private Marker isMarker;
     private Marker cpMarker;
+    private Marker cbyEntrance;
+    private Marker hmlEntrance;
+
+    private Polyline outsidePath;
+
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -66,6 +75,11 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         LatLng hs = new LatLng(45.421755, -75.679601);
         LatLng is = new LatLng(45.424537, -75.686460);
         LatLng cp = new LatLng(45.421764, -75.680541);
+        LatLng cbyEnt = new LatLng(45.419968, -75.679397);
+        LatLng hmlEnt = new LatLng(45.423655, -75.685811);
+
+        cbyEntrance = mMap.addMarker(new MarkerOptions().position(cbyEnt).title("start point"));
+        hmlEntrance = mMap.addMarker(new MarkerOptions().position(hmlEnt).title("end point"));
 
         cbyMarker = mMap.addMarker(new MarkerOptions().position(cby).title("Colonel By Hall (CBY)"));
         steMarker = mMap.addMarker(new MarkerOptions().position(ste).title("SITE (STE)"));
@@ -114,7 +128,43 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         if(marker.equals(steMarker)) {
             startActivity(new Intent(this, ste.class));
         }
+
+        if(marker.equals(cbyEntrance)){
+            String url = getUrl();
+            Log.d("Steps","about to FetchURL");
+            new FetchURL(MapsActivity.this).execute(url,"walking");
+
+        }
+
         return false;
 
+    }
+
+    private String getUrl(){
+
+        Log.d("Steps","in getUrl");
+
+        // IN THE FUTURE SHOULDN'T HAVE THIS STUFF HARDCODED, WILL USE MARKERS AND VALUES
+
+        String urlStr = "http://maps.googleapis.com/maps/api/directions/json?";
+
+        urlStr = urlStr+"origin="+"45.419968"+","+"-75.679397" //set the origin point with coords
+                +"&destination="+"45.423655"+","+"-75.685811" //set the destination point with coords
+                +"&key="+(R.string.google_maps_key) //specify the API key for our app (NOTE: normally this would NEVER be in the app, but rather on a server, in order to protect the key)
+                +"&mode=walking"; //specify the transportation mode, in our case it will always be walking
+
+        Log.d("Directions", "url is (without locomotion mode)"+urlStr);
+
+        return urlStr;
+
+    }
+
+    @Override
+    public void onTaskDone(Object... values) {
+        if (outsidePath!=null){
+            outsidePath.remove();
+        }
+        outsidePath = mMap.addPolyline((PolylineOptions) values[0]);
+        Log.d("Steps","end of onTaskDone");
     }
 }
