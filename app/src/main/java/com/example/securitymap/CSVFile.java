@@ -1,21 +1,17 @@
 package com.example.securitymap;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Rect;
-import android.util.Log;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Hashtable;
 
 
 public class CSVFile {
     InputStream inputStream;
 
-    static ArrayList<Node> nodes = new ArrayList<Node>();
-    static ArrayList buildNames = new ArrayList<Build>();
-    static ArrayList<Building> buildings = new ArrayList<Building>();
+    static Hashtable<Integer, Node> nodes = new Hashtable<>();
+    static Hashtable<Build, Building> buildings = new Hashtable<>();
     Node node;
     Building building;
     Floor floor;
@@ -30,15 +26,14 @@ public class CSVFile {
                     case -1:
                         building = new Building();
                         building.name = Build.valueOf(row[1]);
-                        if(!buildNames.contains(building.name)) {
+                        if(!buildings.containsKey(building.name)) {
                             building.lat1 = Float.parseFloat(row[2]);
                             building.lng1 = Float.parseFloat(row[3]);
                             building.lat2 = Float.parseFloat(row[4]);
                             building.lng2 = Float.parseFloat(row[5]);
                             building.dist = Double.parseDouble(row[6]);
                             building.floors = new ArrayList<Floor>();
-                            buildNames.add(building.name);
-                            buildings.add(building);
+                            buildings.put(building.name, building);
                         }
                         break;
                     case -2:
@@ -49,12 +44,12 @@ public class CSVFile {
                         floor.height = Double.parseDouble(row[4]);
                         floor.ox = Double.parseDouble(row[5]);
                         floor.oy = Double.parseDouble(row[6]);
-                        buildings.get(buildings.size()-1).floors.add(floor);
+                        buildings.get(building.name).floors.add(floor);
                         break;
                     default:
                         node = new Node();
-                        node.neighbour = new ArrayList<Integer>();
-                        node.distance = new ArrayList<Double>();
+                        node.neighbour = new ArrayList<>();
+                        node.distance = new ArrayList<>();
 
                         node.n=index;
                         node.building=building.name;
@@ -85,12 +80,11 @@ public class CSVFile {
                         }
                         int m=4;
                         while(m<row.length){
-                            Log.d("csv", index+", "+m);
                             node.neighbour.add(Integer.parseInt(row[m]));
                             node.distance.add(Double.parseDouble(row[m+1]));
                             m+=2;
                         }
-                        nodes.add(node);
+                        nodes.put(index, node);
                         break;
                     }
                 }
@@ -109,23 +103,11 @@ public class CSVFile {
         }
     }
 
-    public static Bitmap drawablesToBitmaps(Bitmap myBitmap){
-        Bitmap tempBitmap = Bitmap.createBitmap(myBitmap.getWidth()*2, myBitmap.getHeight()*2, Bitmap.Config.RGB_565);
-        Canvas tempCanvas = new Canvas(tempBitmap);
-        tempCanvas.drawBitmap(myBitmap, null, new Rect(0, 0, myBitmap.getWidth()*2, myBitmap.getHeight()*2), null);
-        //tempCanvas.drawLine(x1, y1, x2, y2, myPaint);
-        return tempBitmap;
-    }
-
-    public static ArrayList<com.example.securitymap.Build> getBuildNames() {
-        return buildNames;
-    }
-
-    public static ArrayList<Building> getBuildings() {
+    public static Hashtable<Build, Building> getBuildings() {
         return buildings;
     }
 
-    public static ArrayList<Node> getNodes() {
+    public static Hashtable<Integer, Node> getNodes() {
         return nodes;
     }
 }

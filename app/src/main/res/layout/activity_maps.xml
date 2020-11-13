@@ -25,9 +25,9 @@
         android:id="@+id/imageButton2"
         android:layout_width="75dp"
         android:layout_height="75dp"
-        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
-        android:layout_marginRight="10dp"
+        android:layout_marginEnd="10dp"
         android:layout_marginBottom="10dp"
         android:backgroundTint="#00FFFFFF"
         android:scaleType="fitCenter"
@@ -38,8 +38,8 @@
         android:layout_width="75dp"
         android:layout_height="75dp"
         android:layout_above="@id/imageButton2"
-        android:layout_alignParentRight="true"
-        android:layout_marginRight="10dp"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="10dp"
         android:backgroundTint="#00FFFFFF"
         android:scaleType="fitCenter"
         android:src="@drawable/emergency_contact_icon" />
@@ -62,9 +62,41 @@
         android:layout_width="61dp"
         android:layout_height="61dp"
         android:layout_marginTop="4dp"
-        android:layout_toLeftOf="@id/search"
+        android:layout_toStartOf="@id/search"
         android:backgroundTint="#FFFFFF"
         android:scaleType="fitCenter"
         android:src="@drawable/menu_icon" />
+
+    <Button
+        android:id="@+id/button4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentBottom="true"
+        android:background="#00FFFFFF"
+        android:text="Calculate"
+        android:textColor="#00FFFFFF" />
+
+    <EditText
+        android:id="@+id/editTextTextPersonName"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/button4"
+        android:layout_alignParentStart="true"
+        android:background="#00FFFFFF"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:textColor="#00FFFFFF" />
+
+    <EditText
+        android:id="@+id/editTextTextPersonName2"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/editTextTextPersonName"
+        android:layout_alignParentStart="true"
+        android:background="#00FFFFFF"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:textColor="#00FFFFFF" />
 
 </RelativeLayout>

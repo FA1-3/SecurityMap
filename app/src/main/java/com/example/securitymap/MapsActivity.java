@@ -1,14 +1,15 @@
 package com.example.securitymap;
 
 
-
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.FragmentActivity;
 
-import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.RelativeLayout;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -24,13 +25,18 @@ import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Enumeration;
+import java.util.Hashtable;
 
 public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener//, ActivityCompat.OnRequestPermissionsResultCallback
 {
     private GoogleMap mMap;
-    static int width;
-    static int height;
-    static ArrayList<Node> nodesList;
+    private Intent intent;
+    public int width;
+    public int height;
+    public Hashtable<Integer, Node> nodesList;
+
 
     //45.425490, -75.689445, 45.418436, -75.675062
     private LatLngBounds UOTTAWA = new LatLngBounds(new LatLng(45.418436, -75.689445), new LatLng(45.425490, -75.675062));
@@ -96,26 +102,58 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         CSVFile csvFile = new CSVFile();
         csvFile.inputStream = inputStream;
         csvFile.read();
-        nodesList = new ArrayList<>();
         nodesList = CSVFile.getNodes();
+
+        intent = new Intent(this, Indoor.class);
+        Button button4 = (Button)findViewById(R.id.button4);
+        button4.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                EditText start = (EditText)findViewById(R.id.editTextTextPersonName2);
+                EditText end = (EditText)findViewById(R.id.editTextTextPersonName);
+                Dijkstra.calculatePath(nodesList, Integer.parseInt(String.valueOf(start.getText())), Integer.parseInt(String.valueOf(end.getText())));
+                ArrayList<Integer> path = Dijkstra.path;
+                Dijkstra.pathProgress = 0;
+
+
+                if(nodesList.get(path.get(0)).building!=Build.OUT){
+                    intent.putExtra("type", "path");
+                    intent.putExtra("building", String.valueOf(nodesList.get(path.get(0)).building));
+                    intent.putExtra("floor", nodesList.get(path.get(0)).floor);
+                    startActivity(intent);
+                } else {
+                    //draw Polyline
+                    //show next/back buttons
+                }
+            }
+        });
+
+
         googleMap.setOnMarkerClickListener(this);
     }
 
         @Override
     public boolean onMarkerClick(Marker marker) {
+        intent.putExtra("type", "browse");
+
         if(marker.equals(cbyMarker)) {
-            Intent intent = new Intent(this, Indoor.class);
-            String str = "CBY";
-            intent.putExtra("key", str);
-            startActivity(intent);
+            intent.putExtra("building", "CBY");
+            intent.putExtra("floor", 1);
         }
+
         if(marker.equals(steMarker)) {
-            Intent intent = new Intent(this, Indoor.class);
-            String str = "STE";
-            intent.putExtra("key", str);
-            startActivity(intent);
+            intent.putExtra("building", "STE");
+            intent.putExtra("floor", 1);
         }
+
+        if(marker.equals(lprMarker)) {
+            intent.putExtra("building", "STM");
+            intent.putExtra("floor", 2);
+        }
+
+        startActivity(intent);
         return false;
 
     }
+
 }
