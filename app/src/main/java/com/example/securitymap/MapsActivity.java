@@ -3,9 +3,13 @@ package com.example.securitymap;
 
 import androidx.fragment.app.FragmentActivity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.RelativeLayout;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -28,6 +32,7 @@ import java.util.Hashtable;
 public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener//, ActivityCompat.OnRequestPermissionsResultCallback
 {
     private GoogleMap mMap;
+    private Intent intent;
     public int width;
     public int height;
     public Hashtable<Integer, Node> nodesList;
@@ -99,39 +104,29 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         csvFile.read();
         nodesList = CSVFile.getNodes();
 
-        Hashtable<Build, Building> buildings;
-        Hashtable<Integer, Node> nodes;
-        buildings = CSVFile.getBuildings();
-        nodes = CSVFile.getNodes();
-        ArrayList<Integer> path;
+        intent = new Intent(this, Indoor.class);
+        Button button4 = (Button)findViewById(R.id.button4);
+        button4.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                EditText start = (EditText)findViewById(R.id.editTextTextPersonName2);
+                EditText end = (EditText)findViewById(R.id.editTextTextPersonName);
+                Dijkstra.calculatePath(nodesList, Integer.parseInt(String.valueOf(start.getText())), Integer.parseInt(String.valueOf(end.getText())));
+                ArrayList<Integer> path = Dijkstra.path;
+                Dijkstra.pathProgress = 0;
 
-        /*Enumeration<Integer> keys = nodes.keys();
-        int k;
-        while(keys.hasMoreElements()) {
-            k=keys.nextElement();
-            Log.d("taggg", nodes.get(k).toStr());
 
-        }*/
-
-        Dijkstra.calculatePath(nodes, 5, 55);
-        path = Dijkstra.path;
-        Dijkstra.pathProgress = 0;
-
-        Log.d("tag1", "\nPath:\n");
-        for(int i=0; i<path.size(); i++){
-            Log.d("tag1", String.valueOf(path.get(i)));
-        }
-        if(nodes.get(path.get(0)).building!=Build.OUT){
-            Intent intent = new Intent(this, Indoor.class);
-            intent.putExtra("type", "path");
-            intent.putExtra("building", String.valueOf(nodes.get(path.get(0)).building));
-            intent.putExtra("floor", nodes.get(path.get(0)).floor);
-            startActivity(intent);
-        } else {
-            //draw Polyline
-            //show next/back buttons
-        }
-
+                if(nodesList.get(path.get(0)).building!=Build.OUT){
+                    intent.putExtra("type", "path");
+                    intent.putExtra("building", String.valueOf(nodesList.get(path.get(0)).building));
+                    intent.putExtra("floor", nodesList.get(path.get(0)).floor);
+                    startActivity(intent);
+                } else {
+                    //draw Polyline
+                    //show next/back buttons
+                }
+            }
+        });
 
 
         googleMap.setOnMarkerClickListener(this);
@@ -139,7 +134,6 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
 
         @Override
     public boolean onMarkerClick(Marker marker) {
-        Intent intent = new Intent(this, Indoor.class);
         intent.putExtra("type", "browse");
 
         if(marker.equals(cbyMarker)) {
@@ -152,6 +146,10 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
             intent.putExtra("floor", 1);
         }
 
+        if(marker.equals(lprMarker)) {
+            intent.putExtra("building", "STM");
+            intent.putExtra("floor", 2);
+        }
 
         startActivity(intent);
         return false;

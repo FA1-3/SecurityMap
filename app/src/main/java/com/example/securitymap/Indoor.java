@@ -87,15 +87,15 @@ public class Indoor extends AppCompatActivity {
         }
     }
     public void setView(Building building1, int floorNum){
-        if(building!=building1) {
+        if(building!=building1&&type.equals("path")) {
             building = building1;
             floorBitmaps.clear();
             createBitmaps();
         }
-        floorText.setText(building.floors.get(floorNum).name);
-        buildingText.setText(String.valueOf(building.name));
         floorBar.setMax(building.floors.size());
         floorBar.setProgress(floorNum);
+        floorText.setText(building.floors.get(floorNum).name);
+        buildingText.setText(String.valueOf(building.name));
         String imageName = String.valueOf(building.name).toLowerCase()+floorNum;
         floorPlan.setImageResource(getResources().getIdentifier(imageName, "drawable",  getPackageName()));
 
@@ -177,18 +177,15 @@ public class Indoor extends AppCompatActivity {
         next = (Button)findViewById(R.id.button);
         nextText = (TextView)findViewById(R.id.textView);
 
-        createBitmaps();
+        if(type.equals("path"))
+            createBitmaps();
         setView(building, floor);
 
 
         floorBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar floor, int progress, boolean fromUser) {
-                //setView(building, progress);
-
-                /*Intent intent = new Intent(getApplicationContext(), MapsActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                startActivity(intent);*/
+                setView(building, progress);
             }
 
             @Override
