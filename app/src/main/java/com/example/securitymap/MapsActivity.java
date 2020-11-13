@@ -1,11 +1,8 @@
 package com.example.securitymap;
 
 
-
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.FragmentActivity;
 
-import android.Manifest;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -24,13 +21,17 @@ import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Enumeration;
+import java.util.Hashtable;
 
 public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener//, ActivityCompat.OnRequestPermissionsResultCallback
 {
     private GoogleMap mMap;
-    static int width;
-    static int height;
-    static ArrayList<Node> nodesList;
+    public int width;
+    public int height;
+    public Hashtable<Integer, Node> nodesList;
+
 
     //45.425490, -75.689445, 45.418436, -75.675062
     private LatLngBounds UOTTAWA = new LatLngBounds(new LatLng(45.418436, -75.689445), new LatLng(45.425490, -75.675062));
@@ -96,26 +97,65 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         CSVFile csvFile = new CSVFile();
         csvFile.inputStream = inputStream;
         csvFile.read();
-        nodesList = new ArrayList<>();
         nodesList = CSVFile.getNodes();
+
+        Hashtable<Build, Building> buildings;
+        Hashtable<Integer, Node> nodes;
+        buildings = CSVFile.getBuildings();
+        nodes = CSVFile.getNodes();
+        ArrayList<Integer> path;
+
+        /*Enumeration<Integer> keys = nodes.keys();
+        int k;
+        while(keys.hasMoreElements()) {
+            k=keys.nextElement();
+            Log.d("taggg", nodes.get(k).toStr());
+
+        }*/
+
+        Dijkstra.calculatePath(nodes, 5, 55);
+        path = Dijkstra.path;
+        Dijkstra.pathProgress = 0;
+
+        Log.d("tag1", "\nPath:\n");
+        for(int i=0; i<path.size(); i++){
+            Log.d("tag1", String.valueOf(path.get(i)));
+        }
+        if(nodes.get(path.get(0)).building!=Build.OUT){
+            Intent intent = new Intent(this, Indoor.class);
+            intent.putExtra("type", "path");
+            intent.putExtra("building", String.valueOf(nodes.get(path.get(0)).building));
+            intent.putExtra("floor", nodes.get(path.get(0)).floor);
+            startActivity(intent);
+        } else {
+            //draw Polyline
+            //show next/back buttons
+        }
+
+
+
         googleMap.setOnMarkerClickListener(this);
     }
 
         @Override
     public boolean onMarkerClick(Marker marker) {
+        Intent intent = new Intent(this, Indoor.class);
+        intent.putExtra("type", "browse");
+
         if(marker.equals(cbyMarker)) {
-            Intent intent = new Intent(this, Indoor.class);
-            String str = "CBY";
-            intent.putExtra("key", str);
-            startActivity(intent);
+            intent.putExtra("building", "CBY");
+            intent.putExtra("floor", 1);
         }
+
         if(marker.equals(steMarker)) {
-            Intent intent = new Intent(this, Indoor.class);
-            String str = "STE";
-            intent.putExtra("key", str);
-            startActivity(intent);
+            intent.putExtra("building", "STE");
+            intent.putExtra("floor", 1);
         }
+
+
+        startActivity(intent);
         return false;
 
     }
+
 }
