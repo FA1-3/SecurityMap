@@ -56,6 +56,7 @@ public class Indoor extends AppCompatActivity {
     private int nextFloor;
     private Build backBuilding;
     private int backFloor;
+    private Button directions;
 
     public void createBitmaps(){
         Log.d("taggg", "beginning gay loop "+building.name);
@@ -123,6 +124,7 @@ public class Indoor extends AppCompatActivity {
             pathImage.setVisibility(View.VISIBLE);
             pathImage.setImageDrawable(new BitmapDrawable(getResources(), floorBitmaps.get(floorNum)));
             back.setVisibility(View.VISIBLE);
+            directions.setVisibility(View.INVISIBLE);
             if(backBuilding!=Build.NUL) {
                 backText.setVisibility(View.VISIBLE);
                 back.setEnabled(true);
@@ -148,6 +150,7 @@ public class Indoor extends AppCompatActivity {
             backText.setVisibility(View.INVISIBLE);
             next.setVisibility(View.INVISIBLE);
             nextText.setVisibility(View.INVISIBLE);
+            directions.setVisibility(View.VISIBLE);
         }
     }
 
@@ -176,6 +179,7 @@ public class Indoor extends AppCompatActivity {
         backText = (TextView)findViewById(R.id.textView3);
         next = (Button)findViewById(R.id.button);
         nextText = (TextView)findViewById(R.id.textView);
+        directions = (Button)findViewById(R.id.button7);
 
         if(type.equals("path"))
             createBitmaps();
@@ -219,7 +223,6 @@ public class Indoor extends AppCompatActivity {
             public void onClick(View v) {
                 Dijkstra.pathProgress = nextProgress;
                 setView(buildings.get(nextBuilding), nextFloor);
-                //Log.d("date", String.valueOf(building.name));
             }
         });
     }
