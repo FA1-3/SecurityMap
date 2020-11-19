@@ -9,6 +9,7 @@ public class Building {
     public float lat2;
     public float lng2;
     public double dist;
+    public int center;
 
     public ArrayList<Floor> floors;
 }
