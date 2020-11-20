@@ -1,6 +1,7 @@
 package com.example.securitymap;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -20,6 +21,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.Hashtable;
 
 import static android.view.MotionEvent.INVALID_POINTER_ID;
@@ -57,6 +59,11 @@ public class Indoor extends AppCompatActivity {
     private Build backBuilding;
     private int backFloor;
     private Button directions;
+    private ImageView pin;
+    private ImageButton pinBtn;
+    private TextView dropPin;
+    private ImageView box;
+    private ConstraintLayout constraint;
 
     public void createBitmaps(){
         Log.d("taggg", "beginning gay loop "+building.name);
@@ -100,9 +107,9 @@ public class Indoor extends AppCompatActivity {
         String imageName = String.valueOf(building.name).toLowerCase()+floorNum;
         floorPlan.setImageResource(getResources().getIdentifier(imageName, "drawable",  getPackageName()));
 
+
         if(type.equals("path")) {
             pathProgress = Dijkstra.pathProgress;
-
             if(pathProgress!=0){
                 backBuilding=Dijkstra.pathBuildings.get(pathProgress-1);
                 backFloor=Dijkstra.pathFloors.get(pathProgress-1);
@@ -111,7 +118,6 @@ public class Indoor extends AppCompatActivity {
                 backBuilding = Build.NUL;
                 backFloor = -1;
             }
-
             if(pathProgress!=Dijkstra.pathBuildings.size()-1){
                 nextBuilding=Dijkstra.pathBuildings.get(pathProgress+1);
                 nextFloor=Dijkstra.pathFloors.get(pathProgress+1);
@@ -154,6 +160,24 @@ public class Indoor extends AppCompatActivity {
         }
     }
 
+    public int getClosestNode(Build build, int floor){
+        Enumeration<Integer> keys = nodes.keys();
+        double distance;
+        Node node;
+        int n=0;
+        int i;
+        //double x =
+        while (keys.hasMoreElements()){
+            i = keys.nextElement();
+            node = nodes.get(i);
+            if(node.building==build&&node.floor==floor){
+
+                n = node.n;
+            }
+        }
+        return n;
+    }
+
 
 
     @Override
@@ -168,7 +192,7 @@ public class Indoor extends AppCompatActivity {
         floorPlan = (ImageView)findViewById(R.id.imageView2);
         pathImage = (ImageView)findViewById(R.id.imageView);
         mPosX = floorPlan.getX();
-        mPosX = floorPlan.getY();
+        mPosY = floorPlan.getY();
         buildings = CSVFile.getBuildings();
         nodes = CSVFile.getNodes();
         building = buildings.get(Build.valueOf(build));
@@ -180,11 +204,25 @@ public class Indoor extends AppCompatActivity {
         next = (Button)findViewById(R.id.button);
         nextText = (TextView)findViewById(R.id.textView);
         directions = (Button)findViewById(R.id.button7);
+        directions.setEnabled(false);
+        pin = (ImageView)findViewById(R.id.imageView4);
+        pin.setVisibility(View.INVISIBLE);
+        pinBtn = (ImageButton)findViewById(R.id.imageButton7);
+        dropPin = (TextView) findViewById(R.id.textView7);
+        dropPin.setText("Drop Pin");
+        box = (ImageView) findViewById(R.id.imageView6);
+        constraint = (ConstraintLayout) findViewById(R.id.constraint1);
+        constraint.setVisibility(View.INVISIBLE);
 
-        if(type.equals("path"))
+        if(type.equals("path")) {
             createBitmaps();
+            pinBtn.setVisibility(View.INVISIBLE);
+            dropPin.setVisibility(View.INVISIBLE);
+        }
         setView(building, floor);
 
+        //Canvas canvas = ne
+        //floorBitmaps[1]
 
         floorBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -207,6 +245,27 @@ public class Indoor extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 finish();
+            }
+        });
+
+        pinBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(dropPin.getText()=="Drop Pin"){
+                    pin.setVisibility(View.VISIBLE);
+                    dropPin.setText("Remove Pin");
+                    directions.setEnabled(true);
+                    directions.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+
+                        }
+                    });
+                } else {
+                    pin.setVisibility(View.INVISIBLE);
+                    dropPin.setText("Drop Pin");
+                    directions.setEnabled(false);
+                }
             }
         });
 
@@ -285,6 +344,9 @@ public class Indoor extends AppCompatActivity {
                 //mPosX = Math.max(1.0f, Math.min(mScaleFactor, 5.0f));
                 //mPosY = Math.max(1.0f, Math.min(mScaleFactor, 5.0f));
                 floorPlan.setX(mPosX);
+                box.setX(mPosX);
+                box.setY(mPosY);
+                Log.d("mouvement", mPosX+", "+mPosY);
                 floorPlan.setY(mPosY);
                 pathImage.setX(mPosX);
                 pathImage.setY(mPosY);

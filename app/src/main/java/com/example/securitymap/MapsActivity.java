@@ -58,6 +58,11 @@ import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
+import static java.lang.Math.PI;
+import static java.lang.Math.cos;
+import static java.lang.Math.pow;
+import static java.lang.Math.sqrt;
+
 public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener//, ActivityCompat.OnRequestPermissionsResultCallback
 {
     private GoogleMap mMap;
@@ -78,6 +83,10 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
     private Button startLocation;
     private TextView clickMessage;
     private Button setStart;
+    private Button cancelStart;
+
+    private static final double EARTH_RADIUS = 6378100;
+    private LatLng origin;
 
 
     private Intent intent;
@@ -94,6 +103,16 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
 
         //return node
     //}
+
+    public double getX(double longitude){
+        double x = EARTH_RADIUS*cos(origin.latitude);
+        x = x*(longitude-origin.longitude)*PI/180;
+        return x;
+    }
+    public double getY(double latitude){
+        double y = EARTH_RADIUS*(latitude-origin.latitude)*PI/180;
+        return y;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -138,13 +157,14 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         clickMessage = (TextView)findViewById(R.id.textView19);
         setStart = (Button)findViewById(R.id.button14);
         setStart.setVisibility(View.INVISIBLE);
+        cancelStart = (Button)findViewById(R.id.button16);
+        cancelStart.setVisibility(View.INVISIBLE);
 
-
+        origin = new LatLng(45.419513, -75.678796);
         Bitmap b = BitmapFactory.decodeResource(getResources(), R.drawable.building_icon);
         Bitmap smallMarker = Bitmap.createScaledBitmap(b, 100, 100, false);
         BitmapDescriptor smallMarkerIcon = BitmapDescriptorFactory.fromBitmap(smallMarker);
 
-        // 45.425490, -75.689445, 45.418436, -75.675062
         LatLng cby = new LatLng(45.419754, -75.679601);
         LatLng ste = new LatLng(45.419308, -75.678701);
         LatLng lpr = new LatLng(45.421250, -75.680353);
@@ -183,6 +203,7 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         buildings = CSVFile.getBuildings();
 
         intent = new Intent(this, Indoor.class);
+
         /*Button button4 = (Button) findViewById(R.id.button4);
         button4.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -216,6 +237,7 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         updateLocationUI();
         getDeviceLocation();
         googleMap.setOnMarkerClickListener(this);
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(defaultLocation, DEFAULT_ZOOM));
     }
 
     private void getDeviceLocation() {
@@ -229,9 +251,9 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
                             // Set the map's camera position to the current location of the device.
                             lastKnownLocation = task.getResult();
                             if (lastKnownLocation != null) {
-                                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                                        new LatLng(lastKnownLocation.getLatitude(),
-                                                lastKnownLocation.getLongitude()), DEFAULT_ZOOM));
+                                //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                                        //new LatLng(lastKnownLocation.getLatitude(),
+                                                //lastKnownLocation.getLongitude()), DEFAULT_ZOOM));
                             }
                         } else {
                             Log.d("TAG", "Current location is null. Using defaults.");
@@ -300,7 +322,7 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         @Override
     public boolean onMarkerClick(Marker marker) {
         intent.putExtra("type", "browse");
-
+        intent.putExtra("building", "");
         if(marker.equals(cbyMarker)) {
             intent.putExtra("building", "CBY");
             intent.putExtra("floor", 1);
@@ -317,13 +339,36 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         }
         constraint.setVisibility(View.VISIBLE);
         cancel.setVisibility(View.INVISIBLE);
+        clickMessage.setVisibility(View.INVISIBLE);
         startMap.setVisibility(View.INVISIBLE);
         startLocation.setVisibility(View.INVISIBLE);
         buildingName.setText(intent.getStringExtra("building"));
+        setStart.setEnabled(true);
+        setStart.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startNode = buildings.get(Build.valueOf(intent.getStringExtra("building"))).center;
+
+                Dijkstra.calculatePath(nodesList, startNode, endNode);
+                ArrayList<Integer> path = Dijkstra.path;
+                Dijkstra.pathProgress = 0;
+                if (nodesList.get(path.get(0)).building != Build.OUT) {
+                    intent.putExtra("type", "path");
+                    intent.putExtra("building", String.valueOf(nodesList.get(path.get(0)).building));
+                    intent.putExtra("floor", nodesList.get(path.get(0)).floor);
+                    startActivity(intent);
+                } else {
+                    //draw Polyline
+                    //show next/back buttons
+                }
+            }
+        });
 
         direction.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                setStart.setVisibility(View.INVISIBLE);
+                cancelStart.setVisibility(View.INVISIBLE);
                 endNode = buildings.get(Build.valueOf(intent.getStringExtra("building"))).center;
                 clickMessage.setVisibility(View.VISIBLE);
                 cancel.setVisibility(View.VISIBLE);
@@ -346,23 +391,39 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
                 startLocation.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        ArrayList<Building> nearby = new ArrayList<>();
+                        double[] pt1 = {getX(lastKnownLocation.getLongitude()), getY(lastKnownLocation.getLatitude())};
                         Enumeration<Build> keys = buildings.keys();
                         Build k;
                         while(keys.hasMoreElements()) {
                             k=keys.nextElement();
                             Building building1 = buildings.get(k);
+                            Node node = nodesList.get(building1.center);
+                            double[] pt2 = {node.x, node.y};
+                            if(sqrt(pow((pt1[0]-pt2[0]),2)+pow((pt1[1]-pt2[1]),2))<65){
+                                nearby.add(building1);
+                            }
                         }
+
+
                     }
                 });
                 startMap.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        cancel.setVisibility(View.INVISIBLE);
-                        startMap.setVisibility(View.INVISIBLE);
-                        startLocation.setVisibility(View.INVISIBLE);
-                        clickMessage.setVisibility(View.INVISIBLE);
+                        constraint.setVisibility(View.INVISIBLE);
                         setStart.setVisibility(View.VISIBLE);
                         setStart.setEnabled(false);
+                        cancelStart.setVisibility(View.VISIBLE);
+                        cancelStart.setEnabled(true);
+                        cancelStart.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                constraint.setVisibility(View.VISIBLE);
+                                setStart.setVisibility(View.INVISIBLE);
+                                cancelStart.setVisibility(View.INVISIBLE);
+                            }
+                        });
                     }
                 });
 
