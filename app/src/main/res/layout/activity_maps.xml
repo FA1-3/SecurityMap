@@ -150,12 +150,23 @@
         android:src="@drawable/emergency_contact_icon" />
 
     <Button
-        android:id="@+id/button14"
-        android:layout_width="wrap_content"
+        android:id="@+id/button16"
+        android:layout_width="94dp"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="15dp"
+        android:layout_below="@+id/button14"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="5dp"
+        android:layout_marginEnd="5dp"
+        android:text="Cancel" />
+
+    <Button
+        android:id="@+id/button14"
+        android:layout_width="94dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textView16"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="-325dp"
+        android:layout_marginEnd="5dp"
         android:text="Set Start" />
 
     <SearchView
@@ -222,7 +233,9 @@
         android:layout_marginEnd="10dp"
         android:layout_marginBottom="350dp"
         android:background="#00FFFFFF"
+        android:foreground="@drawable/marker"
         android:scaleType="fitCenter"
+        android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -236,6 +249,8 @@
         android:layout_alignParentBottom="true"
         android:layout_marginEnd="4dp"
         android:layout_marginBottom="330dp"
-        android:text="Drop Pin" />
+        android:text="Drop Pin"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp" />
 
 </RelativeLayout>
