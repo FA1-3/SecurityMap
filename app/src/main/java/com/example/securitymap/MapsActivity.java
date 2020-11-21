@@ -16,6 +16,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -84,6 +85,7 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
     private TextView clickMessage;
     private Button setStart;
     private Button cancelStart;
+    private ImageButton emergency;
 
     private static final double EARTH_RADIUS = 6378100;
     private LatLng origin;
@@ -137,9 +139,9 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         mMap.setMapType(mMap.MAP_TYPE_HYBRID);
-        mMap.setMapStyle(
+        /* mMap.setMapStyle(
                 MapStyleOptions.loadRawResourceStyle(
-                        this, R.raw.map_style));
+                        this, R.raw.map_style)); */
 
         RelativeLayout layout = (RelativeLayout) findViewById(R.id.relative);
         width = layout.getWidth();
@@ -159,6 +161,16 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         setStart.setVisibility(View.INVISIBLE);
         cancelStart = (Button)findViewById(R.id.button16);
         cancelStart.setVisibility(View.INVISIBLE);
+        emergency = (ImageButton) findViewById(R.id.imageButton3);
+        emergency.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                Intent callIntent = new Intent(Intent.ACTION_DIAL);
+                callIntent.setData(Uri.parse("tel:6138798545"));
+                startActivity(callIntent);
+            }
+
+        });
 
         origin = new LatLng(45.419513, -75.678796);
         Bitmap b = BitmapFactory.decodeResource(getResources(), R.drawable.building_icon);
