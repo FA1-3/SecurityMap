@@ -170,7 +170,7 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
             @Override
             public void onClick(View v) {
                 Intent callIntent = new Intent(Intent.ACTION_DIAL);
-                callIntent.setData(Uri.parse("tel:6138798545"));
+                callIntent.setData(Uri.parse("tel:6135625499"));
                 startActivity(callIntent);
             }
 
