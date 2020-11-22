@@ -22,5 +22,6 @@
     <string name="location_permission_denied">Location Permission Denied</string>
     <string name="permission_required_toast">Permission Required Toast</string>
     <string name="permission_rationale_location">Permission Rationale Location</string>
+    <string name="textview">TextView</string>
 
 </resources>
