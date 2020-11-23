@@ -22,14 +22,18 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.PopupMenu;
+import android.widget.ListView;
 import android.widget.RelativeLayout;
+import android.widget.SearchView;
 import android.widget.TextView;
-
+import android.widget.PopupMenu;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -91,6 +95,19 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
     private ImageButton emergency;
     private ImageButton menuOptionsButton;
 
+    private ImageButton menuBtn; // this is the button I set but dont use, for Loic lol
+    private ImageButton searchBtn; //this is the button to pop open the search and list window
+
+    // Search and List layout and contents
+    private ConstraintLayout listAndSearchConstraint; //the layout containing the whole search window
+    private ImageButton backBtnSearch; //the back btn in the search window
+    private SearchView srchbar; //the search bar to type in and filter results
+    private CheckBox bldChk; //check box to see only buildings
+    private CheckBox plcChk; //check box to see only specific places/destinations
+    private ListView lst; //this is the VIEW ONLY that is gonna DISPLAY THE LIST
+    public static ArrayList<ListItem> itemsList = new ArrayList<ListItem>(); //this is the actual list containing ListItems
+
+
     private static final double EARTH_RADIUS = 6378100;
     private LatLng origin;
 
@@ -104,6 +121,7 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
     public Hashtable<Build, Building> buildings;
 
     private LatLngBounds UOTTAWA = new LatLngBounds(new LatLng(45.418436, -75.689445), new LatLng(45.425490, -75.675062));
+
 
     //public int getClosestNode(double latitude, double longitude){
 
@@ -130,6 +148,10 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        // IMPORTANT NEED TO REMOVE EVENTUALLY
+
+
     }
 
     private Marker cbyMarker;
@@ -229,6 +251,51 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         cpMarker = mMap.addMarker(new MarkerOptions().position(cp).title("Campus Pharmacy"));
 
 
+        // Stuff for the search bar layout
+        menuBtn = findViewById(R.id.menuBtn);
+        listAndSearchConstraint = findViewById(R.id.listAndSearchConstraint);
+        listAndSearchConstraint.setVisibility(View.INVISIBLE); //I'm making the whole thing invisible temporarily, to REMOVE!
+        backBtnSearch = findViewById(R.id.backBtnSearch);
+        srchbar = findViewById(R.id.searchBar);
+        bldChk = findViewById(R.id.bldgCheckBox);
+        plcChk = findViewById(R.id.placeCheckBox);
+        lst = findViewById(R.id.theList);
+        searchBtn = findViewById(R.id.searchBtn);
+
+        searchBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                listAndSearchConstraint.setVisibility(View.VISIBLE);
+            }
+        });
+
+        backBtnSearch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                listAndSearchConstraint.setVisibility(View.INVISIBLE);
+            }
+        });
+
+        bldChk.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                filterList();
+            }
+        });
+        plcChk.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                filterList();
+            }
+        });
+
+
+        setupData();
+        setupList();
+        setupListOnClickListener();
+        initSearching();
+
+
         //mMap.setLatLngBoundsForCameraTarget(UOTTAWA);
         //mMap.setMinZoomPreference(15);
         //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(defaultLocation, 15));
@@ -287,7 +354,11 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         getDeviceLocation();
         googleMap.setOnMarkerClickListener(this);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(defaultLocation, DEFAULT_ZOOM));
-    }
+
+        //srcSetupData();
+
+
+    } // End of the onMapReady
 
     private void getDeviceLocation() {
         try {
@@ -489,6 +560,135 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         });
         return false;
 
+    } // end of the OnMarkerClick {}
+
+    //This is in the main class thingy lol
+
+    //public ListItem(String id, String name, int num)
+
+    public void setupData(){
+
+        //Format of ListItem constructor
+        //public ListItem(String id, String name, String building, int floor, int num, int node) {
+
+        ListItem cby = new ListItem("building","Colonel By","cby",-1,0,-1);
+        ListItem ste = new ListItem("building","SITE","ste",-1,1,-1);
+        ListItem stm = new ListItem("building","STEM","stm",-1,2,-1);
+        ListItem mrn = new ListItem("building","Marion","mrn",-1,3,-1);
+        ListItem hml = new ListItem("building","Hamelin","hml",-1,4,-1);
+        ListItem crx = new ListItem("building","Learning Crossroads","crx",-1,5,-1);
+        ListItem van = new ListItem("building","Vanier","van",-1,6,-1);
+        ListItem ftx = new ListItem("building","Fauteux","ftx",-1,7,-1);
+        ListItem dir = new ListItem("building","D'Iorio","dir",-1,8,-1);
+        ListItem lab1 = new ListItem("place","Some random place somewhere","cby",1,9,55);
+        // this last item is a TEST and should be REMOVED eventually
+
+        itemsList.add(cby);
+        itemsList.add(ste);
+        itemsList.add(stm);
+        itemsList.add(mrn);
+        itemsList.add(hml);
+        itemsList.add(crx);
+        itemsList.add(van);
+        itemsList.add(ftx);
+        itemsList.add(dir);
+        itemsList.add(lab1);
+        // remove this last TEST ITEM eventually :)
+
     }
 
-}
+    public void setupList(){
+
+        // I believe this is already done ahead of time, but if it doesnt mess anything up, leave it in case
+        lst = (ListView) findViewById(R.id.theList);
+
+        ListAdapter adapter = new ListAdapter(getApplicationContext(),0, itemsList);
+        lst.setAdapter(adapter);
+
+    }
+
+    public void setupListOnClickListener(){
+
+        lst.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                ListItem selectedItem = (ListItem) (lst.getItemAtPosition(position));
+
+                // This is useless and I need to add in a feature for that
+                Intent itemWasClicked = new Intent(getApplicationContext(),MapsActivity.class);
+
+            }
+        });
+
+    }
+
+
+    public void initSearching(){
+
+        srchbar.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+
+                ArrayList<ListItem> filteredItems = new ArrayList<ListItem>();
+
+                for (ListItem listItem: itemsList){ //goes through the entire initial list
+                    if (listItem.getName().toLowerCase().contains(newText.toLowerCase())){
+                        filteredItems.add(listItem);
+                        // if the searched text is exactly present in the name of the list item,
+                        // then make it part of the filtered list of items
+                    }
+                }
+
+                ListAdapter searchAdapter = new ListAdapter(getApplicationContext(),0, filteredItems);
+                lst.setAdapter(searchAdapter);
+
+                return false;
+            }
+        });
+
+    }
+
+    public void filterList(){
+
+        boolean bldChkChecked = bldChk.isChecked();
+        boolean plcChkChecked = plcChk.isChecked();
+
+        if(!bldChkChecked && !plcChkChecked){
+            setupList();
+        }
+
+        if(bldChkChecked && !plcChkChecked){
+            ArrayList<ListItem> filteredItems = new ArrayList<ListItem>();
+            for (ListItem listItem: itemsList){ //goes through the entire initial list
+                if (listItem.getId().toLowerCase() == "building"){
+                    filteredItems.add(listItem);
+                    // if the item is of type building, keep it in the list
+                }
+            }
+            ListAdapter bldChkAdapter = new ListAdapter(getApplicationContext(),0, filteredItems);
+            lst.setAdapter(bldChkAdapter);
+        }
+
+        if(plcChkChecked && !bldChkChecked){
+            ArrayList<ListItem> filteredItems = new ArrayList<ListItem>();
+            for (ListItem listItem: itemsList){ //goes through the entire initial list
+                if (listItem.getId().toLowerCase() == "place"){
+                    filteredItems.add(listItem);
+                    // if the item is of type building, keep it in the list
+                }
+            }
+            ListAdapter plcChkAdapter = new ListAdapter(getApplicationContext(),0, filteredItems);
+            lst.setAdapter(plcChkAdapter);
+        }
+
+
+
+    }
+
+} //end of the whole thingy lol
