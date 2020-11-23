@@ -16,8 +16,11 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -30,7 +33,7 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.SearchView;
 import android.widget.TextView;
-
+import android.widget.PopupMenu;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -89,6 +92,8 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
     private TextView clickMessage;
     private Button setStart;
     private Button cancelStart;
+    private ImageButton emergency;
+    private ImageButton menuOptionsButton;
 
     private ImageButton menuBtn; // this is the button I set but dont use, for Loic lol
     private ImageButton searchBtn; //this is the button to pop open the search and list window
@@ -160,9 +165,9 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         mMap.setMapType(mMap.MAP_TYPE_HYBRID);
-        //mMap.setMapStyle(
-        //        MapStyleOptions.loadRawResourceStyle(
-        //                this, R.raw.map_style));
+        /* mMap.setMapStyle(
+                MapStyleOptions.loadRawResourceStyle(
+                        this, R.raw.map_style)); */
 
         RelativeLayout layout = (RelativeLayout) findViewById(R.id.relative);
         width = layout.getWidth();
@@ -182,6 +187,49 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         setStart.setVisibility(View.INVISIBLE);
         cancelStart = (Button)findViewById(R.id.button16);
         cancelStart.setVisibility(View.INVISIBLE);
+        emergency = (ImageButton) findViewById(R.id.imageButton3);
+        emergency.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                Intent callIntent = new Intent(Intent.ACTION_DIAL);
+                callIntent.setData(Uri.parse("tel:6135625499"));
+                startActivity(callIntent);
+            }
+
+        });
+
+        menuOptionsButton = (ImageButton) findViewById(R.id.imageButton4);
+        final PopupMenu dropDownMenu = new PopupMenu(this, menuOptionsButton);
+
+        final Menu menu = dropDownMenu.getMenu();
+
+        menu.add(0, 0, 0, "Visibilité réduite");
+        menu.add(0, 1, 0, "Chemin le plus chaud");
+        menu.add(0, 2, 0, "Déplacement libre");
+
+        dropDownMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case 0:
+                        // item ID 0 was clicked
+                        return true;
+                    case 1:
+                        // item ID 1 was clicked
+                        return true;
+                    case 2:
+                        return true;
+                }
+                return false;
+            }
+        });
+
+        menuOptionsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dropDownMenu.show();
+            }
+        });
 
         origin = new LatLng(45.419513, -75.678796);
         Bitmap b = BitmapFactory.decodeResource(getResources(), R.drawable.building_icon);
