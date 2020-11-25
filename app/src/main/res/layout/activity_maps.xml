@@ -199,7 +199,8 @@
         android:scaleType="fitXY"
         android:src="@drawable/menu_icon"
         android:translationX="-30dp"
-        android:visibility="visible" />
+        android:visibility="visible"
+        android:onClick="onMenuItemClick"/>
 
     <!--<Button
         android:id="@+id/button4"
