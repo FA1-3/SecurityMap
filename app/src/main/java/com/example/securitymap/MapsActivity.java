@@ -311,17 +311,21 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         menu.add(0, 1, 0, "Chemin le plus chaud");
         menu.add(0, 2, 0, "Déplacement libre");
 
+        menu.setGroupCheckable(0, true, true);
+
         dropDownMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
+                item.setChecked(true);
                 switch (item.getItemId()) {
                     case 0:
-                        // item ID 0 was clicked
+                        // "Mobilité réduite" was selected -> computes shortest path accordingly;
                         return true;
                     case 1:
-                        // item ID 1 was clicked
+                        // "Chemin le plus chaud" was selected -> computes shortest path accordingly
                         return true;
                     case 2:
+                        // "Déplacement libre" was selected -> computes shortest path accordingly
                         return true;
                 }
                 return false;
