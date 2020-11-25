@@ -64,6 +64,7 @@ public class Indoor extends AppCompatActivity {
     private TextView dropPin;
     private ImageView box;
     private ConstraintLayout constraint;
+    private float initialY;
 
     public void createBitmaps(){
         Log.d("taggg", "beginning gay loop "+building.name);
@@ -106,6 +107,7 @@ public class Indoor extends AppCompatActivity {
         buildingText.setText(String.valueOf(building.name));
         String imageName = String.valueOf(building.name).toLowerCase()+floorNum;
         floorPlan.setImageResource(getResources().getIdentifier(imageName, "drawable",  getPackageName()));
+
 
 
         if(type.equals("path")) {
@@ -162,17 +164,27 @@ public class Indoor extends AppCompatActivity {
 
     public int getClosestNode(Build build, int floor){
         Enumeration<Integer> keys = nodes.keys();
-        double distance;
+        double distance2 = 1000000000;
         Node node;
         int n=0;
         int i;
-        //double x =
+        double xNode;
+        double yNode;
+        double x = buildings.get(build).floors.get(floor).width/2;
+        x -= (double)mPosX*buildings.get(build).floors.get(floor).width/floorPlan.getMeasuredWidth();
+        double y = buildings.get(build).floors.get(floor).height*(0.5+(initialY/floorPlan.getMeasuredHeight()));
+        y -= (double)mPosY*buildings.get(build).floors.get(floor).height/floorPlan.getMeasuredHeight();
         while (keys.hasMoreElements()){
             i = keys.nextElement();
             node = nodes.get(i);
             if(node.building==build&&node.floor==floor){
-
-                n = node.n;
+                xNode = (nodes.get(i).x + buildings.get(build).floors.get(floor).ox);
+                yNode = (buildings.get(build).floors.get(floor).height - nodes.get(i).y - buildings.get(build).floors.get(floor).oy);
+                double dist = Math.pow(x - xNode, 2) + Math.pow(y - yNode, 2);
+                if (dist < distance2) {
+                    distance2  = dist;
+                    n = node.n;
+                }
             }
         }
         return n;
@@ -191,8 +203,6 @@ public class Indoor extends AppCompatActivity {
         mScaleDetector = new ScaleGestureDetector(this, new Indoor.ScaleListener());
         floorPlan = (ImageView)findViewById(R.id.imageView2);
         pathImage = (ImageView)findViewById(R.id.imageView);
-        mPosX = floorPlan.getX();
-        mPosY = floorPlan.getY();
         buildings = CSVFile.getBuildings();
         nodes = CSVFile.getNodes();
         building = buildings.get(Build.valueOf(build));
@@ -221,6 +231,9 @@ public class Indoor extends AppCompatActivity {
         }
         setView(building, floor);
 
+
+        mPosX = (float) 6969696969.0;
+        mPosY = (float) 6969696969.0;
         //Canvas canvas = ne
         //floorBitmaps[1]
 
@@ -258,7 +271,7 @@ public class Indoor extends AppCompatActivity {
                     directions.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-
+                            Log.d("closest", String.valueOf(getClosestNode(building.name, floor)));
                         }
                     });
                 } else {
@@ -308,6 +321,12 @@ public class Indoor extends AppCompatActivity {
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
+        if(mPosX==(float)6969696969.0){
+            mPosX = floorPlan.getX();
+            mPosY = floorPlan.getY();
+            initialY = mPosY;
+        }
+
         // Let the ScaleGestureDetector inspect all events.
         mScaleDetector.onTouchEvent(ev);
 

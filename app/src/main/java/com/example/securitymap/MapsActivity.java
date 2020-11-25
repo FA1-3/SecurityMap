@@ -137,6 +137,110 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         double y = EARTH_RADIUS*(latitude-origin.latitude)*PI/180;
         return y;
     }
+    public void launchPreview(){
+        constraint.setVisibility(View.VISIBLE);
+        cancel.setVisibility(View.INVISIBLE);
+        clickMessage.setVisibility(View.INVISIBLE);
+        startMap.setVisibility(View.INVISIBLE);
+        startLocation.setVisibility(View.INVISIBLE);
+        buildingName.setText(intent.getStringExtra("building"));
+        setStart.setEnabled(true);
+        setStart.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startNode = buildings.get(Build.valueOf(intent.getStringExtra("building"))).center;
+
+                Dijkstra.calculatePath(nodesList, startNode, endNode);
+                ArrayList<Integer> path = Dijkstra.path;
+                Dijkstra.pathProgress = 0;
+                if (nodesList.get(path.get(0)).building != Build.OUT) {
+                    intent.putExtra("type", "path");
+                    intent.putExtra("building", String.valueOf(nodesList.get(path.get(0)).building));
+                    intent.putExtra("floor", nodesList.get(path.get(0)).floor);
+                    startActivity(intent);
+                } else {
+                    //draw Polyline
+                    //show next/back buttons
+                }
+            }
+        });
+
+        direction.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setStart.setVisibility(View.INVISIBLE);
+                cancelStart.setVisibility(View.INVISIBLE);
+                endNode = buildings.get(Build.valueOf(intent.getStringExtra("building"))).center;
+                clickMessage.setVisibility(View.VISIBLE);
+                cancel.setVisibility(View.VISIBLE);
+                startMap.setVisibility(View.VISIBLE);
+                startLocation.setVisibility(View.VISIBLE);
+                if (locationPermissionGranted)
+                    startLocation.setEnabled(true);
+                else
+                    startLocation.setEnabled(false);
+
+                cancel.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        cancel.setVisibility(View.INVISIBLE);
+                        startMap.setVisibility(View.INVISIBLE);
+                        startLocation.setVisibility(View.INVISIBLE);
+                        clickMessage.setVisibility(View.INVISIBLE);
+                    }
+                });
+                startLocation.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        ArrayList<Building> nearby = new ArrayList<>();
+                        double[] pt1 = {getX(lastKnownLocation.getLongitude()), getY(lastKnownLocation.getLatitude())};
+                        Enumeration<Build> keys = buildings.keys();
+                        Build k;
+                        while(keys.hasMoreElements()) {
+                            k=keys.nextElement();
+                            Building building1 = buildings.get(k);
+                            Node node = nodesList.get(building1.center);
+                            double[] pt2 = {node.x, node.y};
+                            if(sqrt(pow((pt1[0]-pt2[0]),2)+pow((pt1[1]-pt2[1]),2))<65){
+                                nearby.add(building1);
+                            }
+                        }
+
+
+                    }
+                });
+                startMap.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        constraint.setVisibility(View.INVISIBLE);
+                        setStart.setVisibility(View.VISIBLE);
+                        setStart.setEnabled(false);
+                        cancelStart.setVisibility(View.VISIBLE);
+                        cancelStart.setEnabled(true);
+                        cancelStart.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                constraint.setVisibility(View.VISIBLE);
+                                setStart.setVisibility(View.INVISIBLE);
+                                cancelStart.setVisibility(View.INVISIBLE);
+                            }
+                        });
+                    }
+                });
+
+
+            }
+        });
+
+
+        inside.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(intent);
+            }
+        });
+
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -198,12 +302,12 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
 
         });
 
-        menuOptionsButton = (ImageButton) findViewById(R.id.imageButton4);
+        menuOptionsButton = (ImageButton) findViewById(R.id.menuBtn);
         final PopupMenu dropDownMenu = new PopupMenu(this, menuOptionsButton);
 
         final Menu menu = dropDownMenu.getMenu();
 
-        menu.add(0, 0, 0, "Visibilité réduite");
+        menu.add(0, 0, 0, "Mobilité réduite");
         menu.add(0, 1, 0, "Chemin le plus chaud");
         menu.add(0, 2, 0, "Déplacement libre");
 
@@ -457,107 +561,7 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
             intent.putExtra("building", "STM");
             intent.putExtra("floor", 2);
         }
-        constraint.setVisibility(View.VISIBLE);
-        cancel.setVisibility(View.INVISIBLE);
-        clickMessage.setVisibility(View.INVISIBLE);
-        startMap.setVisibility(View.INVISIBLE);
-        startLocation.setVisibility(View.INVISIBLE);
-        buildingName.setText(intent.getStringExtra("building"));
-        setStart.setEnabled(true);
-        setStart.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startNode = buildings.get(Build.valueOf(intent.getStringExtra("building"))).center;
-
-                Dijkstra.calculatePath(nodesList, startNode, endNode);
-                ArrayList<Integer> path = Dijkstra.path;
-                Dijkstra.pathProgress = 0;
-                if (nodesList.get(path.get(0)).building != Build.OUT) {
-                    intent.putExtra("type", "path");
-                    intent.putExtra("building", String.valueOf(nodesList.get(path.get(0)).building));
-                    intent.putExtra("floor", nodesList.get(path.get(0)).floor);
-                    startActivity(intent);
-                } else {
-                    //draw Polyline
-                    //show next/back buttons
-                }
-            }
-        });
-
-        direction.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                setStart.setVisibility(View.INVISIBLE);
-                cancelStart.setVisibility(View.INVISIBLE);
-                endNode = buildings.get(Build.valueOf(intent.getStringExtra("building"))).center;
-                clickMessage.setVisibility(View.VISIBLE);
-                cancel.setVisibility(View.VISIBLE);
-                startMap.setVisibility(View.VISIBLE);
-                startLocation.setVisibility(View.VISIBLE);
-                if (locationPermissionGranted)
-                    startLocation.setEnabled(true);
-                else
-                    startLocation.setEnabled(false);
-
-                cancel.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        cancel.setVisibility(View.INVISIBLE);
-                        startMap.setVisibility(View.INVISIBLE);
-                        startLocation.setVisibility(View.INVISIBLE);
-                        clickMessage.setVisibility(View.INVISIBLE);
-                    }
-                });
-                startLocation.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        ArrayList<Building> nearby = new ArrayList<>();
-                        double[] pt1 = {getX(lastKnownLocation.getLongitude()), getY(lastKnownLocation.getLatitude())};
-                        Enumeration<Build> keys = buildings.keys();
-                        Build k;
-                        while(keys.hasMoreElements()) {
-                            k=keys.nextElement();
-                            Building building1 = buildings.get(k);
-                            Node node = nodesList.get(building1.center);
-                            double[] pt2 = {node.x, node.y};
-                            if(sqrt(pow((pt1[0]-pt2[0]),2)+pow((pt1[1]-pt2[1]),2))<65){
-                                nearby.add(building1);
-                            }
-                        }
-
-
-                    }
-                });
-                startMap.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        constraint.setVisibility(View.INVISIBLE);
-                        setStart.setVisibility(View.VISIBLE);
-                        setStart.setEnabled(false);
-                        cancelStart.setVisibility(View.VISIBLE);
-                        cancelStart.setEnabled(true);
-                        cancelStart.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                constraint.setVisibility(View.VISIBLE);
-                                setStart.setVisibility(View.INVISIBLE);
-                                cancelStart.setVisibility(View.INVISIBLE);
-                            }
-                        });
-                    }
-                });
-
-
-            }
-        });
-
-
-        inside.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(intent);
-            }
-        });
+        launchPreview();
         return false;
 
     } // end of the OnMarkerClick {}
