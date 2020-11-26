@@ -194,8 +194,8 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
                         setView();
                     } else {
                         intent.putExtra("type", "path");
-                        intent.putExtra("building", String.valueOf(nodesList.get(path.get(backProgress)).building));
-                        intent.putExtra("floor", nodesList.get(path.get(backProgress)).floor);
+                        intent.putExtra("building", String.valueOf(backBuilding));
+                        intent.putExtra("floor", backFloor);
                         startActivity(intent);
                     }
                 }
@@ -211,19 +211,13 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
                         setView();
                     } else {
                         intent.putExtra("type", "path");
-                        intent.putExtra("building", String.valueOf(nodesList.get(path.get(nextProgress)).building));
-                        intent.putExtra("floor", nodesList.get(path.get(nextProgress)).floor);
+                        intent.putExtra("building", String.valueOf(nextBuilding));
+                        Log.d("outside", String.valueOf(nextBuilding));
+                        intent.putExtra("floor", nextFloor);
+                        Log.d("outside", String.valueOf(nextFloor));
                         startActivity(intent);
                     }
                 }
-            }
-        });
-
-        next.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Dijkstra.pathProgress = nextProgress;
-                setView();
             }
         });
     }
@@ -242,16 +236,19 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
                     polylineOptions = new PolylineOptions();
                     polylineOptions.color(Color.RED);
                     polylineOptions.width(20);
-                    Log.d("outside", i+"");
+                    Log.d("outside", i+"tout");
                     polylineOptions.add(new LatLng((Math.toDegrees(nodesList.get(path.get(i)).y/EARTH_RADIUS))+origin.latitude, (Math.toDegrees(nodesList.get(path.get(i)).x)/(EARTH_RADIUS*Math.cos(Math.toRadians(origin.latitude))))+origin.longitude));
                 }
-                Log.d("outside", i+"");
+                Log.d("outside", i+"toute");
                 polylineOptions.add(new LatLng((Math.toDegrees(nodesList.get(path.get(i+1)).y/EARTH_RADIUS))+origin.latitude, (Math.toDegrees(nodesList.get(path.get(i+1)).x)/(EARTH_RADIUS*Math.cos(Math.toRadians(origin.latitude))))+origin.longitude));
             } else if(i>1&&nodesList.get(path.get(i-1)).building==Build.OUT&&nodesList.get(path.get(i-2)).building==Build.OUT){
                 polyline.add(mMap.addPolyline(polylineOptions));
+                Log.d("outside", i+"toutee");
             }
-            if(i==path.size()-2&&i>1&&nodesList.get(path.get(i-1)).building==Build.OUT&&nodesList.get(path.get(i-2)).building==Build.OUT)
+            if(i==path.size()-2&&i>1&&nodesList.get(path.get(i-1)).building==Build.OUT&&(nodesList.get(path.get(i-2)).building==Build.OUT||nodesList.get(path.get(i)).building==Build.OUT)){
                 polyline.add(mMap.addPolyline(polylineOptions));
+                Log.d("outside", i + "touteee");
+            }
         }
         if (nodesList.get(path.get(0)).building != Build.OUT) {
             intent.putExtra("type", "path");
@@ -565,8 +562,8 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
 
         //srcSetupData();
 
-        startNode = 5036;
-        endNode = 5030;
+        startNode = 5001;
+        endNode = 5040;
         startPath();
     } // End of the onMapReady
 

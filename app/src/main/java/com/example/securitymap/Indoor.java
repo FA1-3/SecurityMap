@@ -66,7 +66,7 @@ public class Indoor extends AppCompatActivity {
     private float initialY;
 
     public void createBitmaps(){
-        Log.d("taggg", "beginning gay loop "+building.name);
+//        Log.d("taggg", "beginning gay loop "+building.name);
         Paint myPaint = new Paint();
         myPaint.setColor(Color.RED);
         myPaint.setAntiAlias(true);
