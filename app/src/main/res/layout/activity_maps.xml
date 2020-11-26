@@ -18,9 +18,7 @@
         android:layout_height="match_parent"
         android:background="#00FFFFFF"
         android:backgroundTint="#00FFFFFF"
-        tools:context=".MapsActivity" >
-
-    </androidx.fragment.app.FragmentContainerView>
+        tools:context=".MapsActivity" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraint1"
@@ -149,9 +147,52 @@
         android:background="#00FFFFFF"
         android:backgroundTint="#00FFFFFF"
         android:foreground="@drawable/emergency_contact_icon"
+        android:rotation="0"
+        android:rotationX="0"
+        android:rotationY="6"
         android:scaleType="fitCenter"
         android:src="@drawable/emergency_contact_icon"
         android:visibility="visible" />
+
+    <Button
+        android:id="@+id/button8"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:text="Back"
+        android:translationX="-70dp"
+        android:translationY="-30dp" />
+
+    <TextView
+        android:id="@+id/textView11"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/button8"
+        android:layout_alignEnd="@+id/button8"
+        android:layout_marginTop="-30dp"
+        android:layout_marginEnd="80dp"
+        android:text="TextView" />
+
+    <TextView
+        android:id="@+id/textView12"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/button9"
+        android:layout_alignStart="@+id/button9"
+        android:layout_marginStart="80dp"
+        android:layout_marginTop="-30dp"
+        android:text="TextView" />
+
+    <Button
+        android:id="@+id/button9"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:text="Next"
+        android:translationX="70dp"
+        android:translationY="-30dp" />
 
     <Button
         android:id="@+id/button16"

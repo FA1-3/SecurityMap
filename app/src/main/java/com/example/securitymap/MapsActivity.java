@@ -15,6 +15,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
@@ -92,10 +93,21 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
     private TextView clickMessage;
     private Button setStart;
     private Button cancelStart;
+    private Button next;
+    private Button back;
+    private int pathProgress;
+    private int backProgress;
+    private int nextProgress;
+    private Build backBuilding;
+    private Build nextBuilding;
+    private int backFloor;
+    private int nextFloor;
+    private TextView nextText;
+    private TextView backText;
     private ImageButton emergency;
     private ImageButton menuOptionsButton;
+    private ArrayList<Integer> path;
 
-    private ImageButton menuBtn; // this is the button I set but dont use, for Loic lol
     private ImageButton searchBtn; //this is the button to pop open the search and list window
 
     // Search and List layout and contents
@@ -127,6 +139,129 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
 
         //return node
     //}
+    public void setView(){
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng((180*nodesList.get(path.get(0)).y/EARTH_RADIUS/PI)+origin.latitude, (Math.toDegrees(nodesList.get(path.get(0)).x)/(EARTH_RADIUS*Math.cos(Math.toRadians(origin.latitude))))+origin.longitude), 30));
+        pathProgress = Dijkstra.pathProgress;
+        if(pathProgress!=0){
+            backBuilding=Dijkstra.pathBuildings.get(pathProgress-1);
+            backFloor=Dijkstra.pathFloors.get(pathProgress-1);
+            backProgress=pathProgress-1;
+        } else {
+            backBuilding = Build.NUL;
+            backFloor = -1;
+        }
+        if(pathProgress!=Dijkstra.pathBuildings.size()-1){
+            nextBuilding=Dijkstra.pathBuildings.get(pathProgress+1);
+            nextFloor=Dijkstra.pathFloors.get(pathProgress+1);
+            nextProgress=pathProgress+1;
+        } else {
+            nextBuilding = Build.NUL;
+            nextFloor = -1;
+        }
+
+        back.setVisibility(View.VISIBLE);
+        if(backBuilding!=Build.NUL) {
+            backText.setVisibility(View.VISIBLE);
+            back.setEnabled(true);
+            if(backBuilding!=Build.OUT)
+                backText.setText(backBuilding+" Floor "+backFloor);
+            else
+                backText.setText("Exterior");
+        } else {
+            backText.setVisibility(View.INVISIBLE);
+            back.setEnabled(false);
+        }
+
+        next.setVisibility(View.VISIBLE);
+        if(nextBuilding!=Build.NUL) {
+            nextText.setVisibility(View.VISIBLE);
+            next.setEnabled(true);
+            if(backBuilding!=Build.OUT)
+                nextText.setText(nextBuilding+" Floor "+nextFloor);
+            else
+                nextText.setText("Exterior");
+        } else {
+            nextText.setVisibility(View.INVISIBLE);
+            next.setEnabled(false);
+        }
+
+        back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Dijkstra.pathProgress = backProgress;
+                if (backBuilding != Build.NUL) {
+                    if (Dijkstra.pathBuildings.get(backProgress) == Build.OUT) {
+                        setView();
+                    } else {
+                        intent.putExtra("type", "path");
+                        intent.putExtra("building", String.valueOf(nodesList.get(path.get(backProgress)).building));
+                        intent.putExtra("floor", nodesList.get(path.get(backProgress)).floor);
+                        startActivity(intent);
+                    }
+                }
+            }
+        });
+
+        next.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Dijkstra.pathProgress = nextProgress;
+                if (nextBuilding != Build.NUL) {
+                    if (Dijkstra.pathBuildings.get(nextProgress) == Build.OUT) {
+                        setView();
+                    } else {
+                        intent.putExtra("type", "path");
+                        intent.putExtra("building", String.valueOf(nodesList.get(path.get(nextProgress)).building));
+                        intent.putExtra("floor", nodesList.get(path.get(nextProgress)).floor);
+                        startActivity(intent);
+                    }
+                }
+            }
+        });
+
+        next.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Dijkstra.pathProgress = nextProgress;
+                setView();
+            }
+        });
+    }
+
+    public void startPath(){
+        Dijkstra.calculatePath(nodesList, startNode, endNode);
+        path = Dijkstra.path;
+        Dijkstra.pathProgress = 0;
+        next.setVisibility(View.VISIBLE);
+        back.setVisibility(View.VISIBLE);
+        ArrayList<Polyline> polyline = new ArrayList<>();
+        PolylineOptions polylineOptions = new PolylineOptions();
+        for (int i=0; i<path.size()-1; i++) {
+            if(nodesList.get(path.get(i)).building==Build.OUT&&nodesList.get(path.get(i+1)).building==Build.OUT){
+                if(i == 0 || nodesList.get(path.get(i - 1)).building != Build.OUT) {
+                    polylineOptions = new PolylineOptions();
+                    polylineOptions.color(Color.RED);
+                    polylineOptions.width(20);
+                    Log.d("outside", i+"");
+                    polylineOptions.add(new LatLng((Math.toDegrees(nodesList.get(path.get(i)).y/EARTH_RADIUS))+origin.latitude, (Math.toDegrees(nodesList.get(path.get(i)).x)/(EARTH_RADIUS*Math.cos(Math.toRadians(origin.latitude))))+origin.longitude));
+                }
+                Log.d("outside", i+"");
+                polylineOptions.add(new LatLng((Math.toDegrees(nodesList.get(path.get(i+1)).y/EARTH_RADIUS))+origin.latitude, (Math.toDegrees(nodesList.get(path.get(i+1)).x)/(EARTH_RADIUS*Math.cos(Math.toRadians(origin.latitude))))+origin.longitude));
+            } else if(i>1&&nodesList.get(path.get(i-1)).building==Build.OUT&&nodesList.get(path.get(i-2)).building==Build.OUT){
+                polyline.add(mMap.addPolyline(polylineOptions));
+            }
+            if(i==path.size()-2&&i>1&&nodesList.get(path.get(i-1)).building==Build.OUT&&nodesList.get(path.get(i-2)).building==Build.OUT)
+                polyline.add(mMap.addPolyline(polylineOptions));
+        }
+        if (nodesList.get(path.get(0)).building != Build.OUT) {
+            intent.putExtra("type", "path");
+            intent.putExtra("building", String.valueOf(nodesList.get(path.get(0)).building));
+            intent.putExtra("floor", nodesList.get(path.get(0)).floor);
+            startActivity(intent);
+        } else {
+            setView();
+        }
+    }
 
     public double getX(double longitude){
         double x = EARTH_RADIUS*cos(origin.latitude);
@@ -149,19 +284,7 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
             @Override
             public void onClick(View v) {
                 startNode = buildings.get(Build.valueOf(intent.getStringExtra("building"))).center;
-
-                Dijkstra.calculatePath(nodesList, startNode, endNode);
-                ArrayList<Integer> path = Dijkstra.path;
-                Dijkstra.pathProgress = 0;
-                if (nodesList.get(path.get(0)).building != Build.OUT) {
-                    intent.putExtra("type", "path");
-                    intent.putExtra("building", String.valueOf(nodesList.get(path.get(0)).building));
-                    intent.putExtra("floor", nodesList.get(path.get(0)).floor);
-                    startActivity(intent);
-                } else {
-                    //draw Polyline
-                    //show next/back buttons
-                }
+                startPath();
             }
         });
 
@@ -255,11 +378,11 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
 
         // IMPORTANT NEED TO REMOVE EVENTUALLY
 
-
     }
 
     private Marker cbyMarker;
     private Marker steMarker;
+    private Marker stmMarker;
     private Marker lprMarker;
     private Marker hsMarker;
     private Marker isMarker;
@@ -291,6 +414,14 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         setStart.setVisibility(View.INVISIBLE);
         cancelStart = (Button)findViewById(R.id.button16);
         cancelStart.setVisibility(View.INVISIBLE);
+        next = (Button)findViewById(R.id.button9);
+        next.setVisibility(View.INVISIBLE);
+        back = (Button)findViewById(R.id.button8);
+        back.setVisibility(View.INVISIBLE);
+        backText = (TextView) findViewById(R.id.textView11);
+        backText.setVisibility(View.INVISIBLE);
+        nextText = (TextView) findViewById(R.id.textView12);
+        nextText.setVisibility(View.INVISIBLE);
         emergency = (ImageButton) findViewById(R.id.imageButton3);
         emergency.setOnClickListener(new View.OnClickListener(){
             @Override
@@ -346,6 +477,7 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
 
         LatLng cby = new LatLng(45.419754, -75.679601);
         LatLng ste = new LatLng(45.419308, -75.678701);
+        LatLng stm = new LatLng(45.420319, -75.680508);
         LatLng lpr = new LatLng(45.421250, -75.680353);
         LatLng hs = new LatLng(45.421755, -75.679601);
         LatLng is = new LatLng(45.424537, -75.686460);
@@ -353,6 +485,7 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
 
         cbyMarker = mMap.addMarker(new MarkerOptions().position(cby).title("Colonel By Hall (CBY)").icon(smallMarkerIcon));
         steMarker = mMap.addMarker(new MarkerOptions().position(ste).title("SITE (STE)"));
+        stmMarker = mMap.addMarker(new MarkerOptions().position(stm).title("STEM (STM)"));
         lprMarker = mMap.addMarker(new MarkerOptions().position(lpr).title("Protection Services (LPR)"));
         hsMarker = mMap.addMarker(new MarkerOptions().position(hs).title("Health Services"));
         isMarker = mMap.addMarker(new MarkerOptions().position(is).title("Info Service"));
@@ -360,7 +493,6 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
 
 
         // Stuff for the search bar layout
-        menuBtn = findViewById(R.id.menuBtn);
         listAndSearchConstraint = findViewById(R.id.listAndSearchConstraint);
         listAndSearchConstraint.setVisibility(View.INVISIBLE); //I'm making the whole thing invisible temporarily, to REMOVE!
         backBtnSearch = findViewById(R.id.backBtnSearch);
@@ -407,17 +539,7 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         //mMap.setLatLngBoundsForCameraTarget(UOTTAWA);
         //mMap.setMinZoomPreference(15);
         //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(defaultLocation, 15));
-        // Instantiates a new Polyline object and adds points to define a rectangle
-        /*PolylineOptions polylineOptions = new PolylineOptions()
-                .add(new LatLng(45.42, -75.68))
-                .add(new LatLng(45.4201, -75.68))  // North of the previous point, but at the same longitude
-                .add(new LatLng(45.4201, -75.681))  // Same latitude, and 30km to the west
-                .add(new LatLng(45.42, -75.681))  // Same longitude, and 16km to the south
-                .add(new LatLng(45.4202, -75.68)); // Closes the polyline.
 
-// Get back the mutable Polyline
-        Polyline polyline = mMap.addPolyline(polylineOptions);
-        */
 
         InputStream inputStream = getResources().openRawResource(R.raw.nodesdata);
         CSVFile csvFile = new CSVFile();
@@ -428,28 +550,6 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
 
         intent = new Intent(this, Indoor.class);
 
-        /*Button button4 = (Button) findViewById(R.id.button4);
-        button4.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                EditText start = (EditText) findViewById(R.id.editTextTextPersonName2);
-                EditText end = (EditText) findViewById(R.id.editTextTextPersonName);
-                Dijkstra.calculatePath(nodesList, Integer.parseInt(String.valueOf(start.getText())), Integer.parseInt(String.valueOf(end.getText())));
-                ArrayList<Integer> path = Dijkstra.path;
-                Dijkstra.pathProgress = 0;
-
-
-                if (nodesList.get(path.get(0)).building != Build.OUT) {
-                    intent.putExtra("type", "path");
-                    intent.putExtra("building", String.valueOf(nodesList.get(path.get(0)).building));
-                    intent.putExtra("floor", nodesList.get(path.get(0)).floor);
-                    startActivity(intent);
-                } else {
-                    //draw Polyline
-                    //show next/back buttons
-                }
-            }
-        });*/
 
         backBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -465,7 +565,9 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
 
         //srcSetupData();
 
-
+        startNode = 5036;
+        endNode = 5030;
+        startPath();
     } // End of the onMapReady
 
     private void getDeviceLocation() {
@@ -561,7 +663,7 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
             intent.putExtra("floor", 1);
         }
 
-        if(marker.equals(lprMarker)) {
+        if(marker.equals(stmMarker)) {
             intent.putExtra("building", "STM");
             intent.putExtra("floor", 2);
         }

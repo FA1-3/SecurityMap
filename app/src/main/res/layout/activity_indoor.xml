@@ -249,13 +249,4 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <ImageView
-        android:id="@+id/imageView6"
-        android:layout_width="10dp"
-        android:layout_height="10dp"
-        android:foreground="#FF0000"
-        app:srcCompat="@drawable/marker"
-        tools:layout_editor_absoluteX="99dp"
-        tools:layout_editor_absoluteY="136dp" />
-
 </androidx.constraintlayout.widget.ConstraintLayout>

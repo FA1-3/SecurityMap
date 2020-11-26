@@ -1,4 +1,6 @@
 package com.example.securitymap;
+import android.util.Log;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,7 +28,7 @@ public class CSVFile {
                     case -1:
                         building = new Building();
                         building.name = Build.valueOf(row[1]);
-                        if(!buildings.containsKey(building.name)) {
+                        if(!buildings.containsKey(building.name)&&building.name!=Build.OUT) {
                             building.lat1 = Float.parseFloat(row[2]);
                             building.lng1 = Float.parseFloat(row[3]);
                             building.lat2 = Float.parseFloat(row[4]);
@@ -53,7 +55,10 @@ public class CSVFile {
 
                         node.n=index;
                         node.building=building.name;
-                        node.floor=floor.num;
+                        if (building.name!=Build.OUT)
+                            node.floor=floor.num;
+                        else
+                            node.floor = -5;
                         node.x=Double.parseDouble(row[1]);
                         node.y=Double.parseDouble(row[2]);
 

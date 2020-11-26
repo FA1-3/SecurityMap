@@ -72,6 +72,7 @@ public class Dijkstra {
         for(int i=1; i<=nodes.get(end).rank; i++){ //pour déterminer le trajet, en commenceant avec le point d'arrivé, prendre le dernier point qui donne le trajet le plus court
                                                     //au point
             path.add(nodes.get(path.get(i-1)).last);
+            Log.d("pathOut", path.get(i)+"");
         }
         path = reverse(path);
 

@@ -62,7 +62,6 @@ public class Indoor extends AppCompatActivity {
     private ImageView pin;
     private ImageButton pinBtn;
     private TextView dropPin;
-    private ImageView box;
     private ConstraintLayout constraint;
     private float initialY;
 
@@ -101,7 +100,7 @@ public class Indoor extends AppCompatActivity {
             floorBitmaps.clear();
             createBitmaps();
         }
-        floorBar.setMax(building.floors.size());
+        floorBar.setMax(building.floors.size()-1);
         floorBar.setProgress(floorNum);
         floorText.setText(building.floors.get(floorNum).name);
         buildingText.setText(String.valueOf(building.name));
@@ -136,7 +135,10 @@ public class Indoor extends AppCompatActivity {
             if(backBuilding!=Build.NUL) {
                 backText.setVisibility(View.VISIBLE);
                 back.setEnabled(true);
-                backText.setText(backBuilding+" Floor "+backFloor);
+                if(backBuilding!=Build.OUT)
+                    backText.setText(backBuilding+" Floor "+backFloor);
+                else
+                    backText.setText("Exterior");
             } else {
                 backText.setVisibility(View.INVISIBLE);
                 back.setEnabled(false);
@@ -146,7 +148,10 @@ public class Indoor extends AppCompatActivity {
             if(nextBuilding!=Build.NUL) {
                 nextText.setVisibility(View.VISIBLE);
                 next.setEnabled(true);
-                nextText.setText(nextBuilding+" Floor "+nextFloor);
+                if(backBuilding!=Build.OUT)
+                    nextText.setText(nextBuilding+" Floor "+nextFloor);
+                else
+                    nextText.setText("Exterior");
             } else {
                 nextText.setVisibility(View.INVISIBLE);
                 next.setEnabled(false);
@@ -220,7 +225,6 @@ public class Indoor extends AppCompatActivity {
         pinBtn = (ImageButton)findViewById(R.id.imageButton7);
         dropPin = (TextView) findViewById(R.id.textView7);
         dropPin.setText("Drop Pin");
-        box = (ImageView) findViewById(R.id.imageView6);
         constraint = (ConstraintLayout) findViewById(R.id.constraint1);
         constraint.setVisibility(View.INVISIBLE);
 
@@ -285,7 +289,7 @@ public class Indoor extends AppCompatActivity {
         back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Dijkstra.pathProgress=backProgress;
+                Dijkstra.pathProgress = backProgress;
                 setView(buildings.get(backBuilding), backFloor);
             }
         });
@@ -363,9 +367,6 @@ public class Indoor extends AppCompatActivity {
                 //mPosX = Math.max(1.0f, Math.min(mScaleFactor, 5.0f));
                 //mPosY = Math.max(1.0f, Math.min(mScaleFactor, 5.0f));
                 floorPlan.setX(mPosX);
-                box.setX(mPosX);
-                box.setY(mPosY);
-                Log.d("mouvement", mPosX+", "+mPosY);
                 floorPlan.setY(mPosY);
                 pathImage.setX(mPosX);
                 pathImage.setY(mPosY);
