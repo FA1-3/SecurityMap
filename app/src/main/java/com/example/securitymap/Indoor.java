@@ -94,12 +94,14 @@ public class Indoor extends AppCompatActivity {
             floorBitmaps.add(tempBitmap);
         }
     }
+
     public void setView(Building building1, int floorNum){
         if(building!=building1&&type.equals("path")) {
             building = building1;
             floorBitmaps.clear();
             createBitmaps();
         }
+
         floorBar.setMax(building.floors.size()-1);
         floorBar.setProgress(floorNum);
         floorText.setText(building.floors.get(floorNum).name);
