@@ -12,6 +12,7 @@ import androidx.fragment.app.FragmentTransaction;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -19,6 +20,7 @@ import android.graphics.Color;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -31,6 +33,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.RatingBar;
 import android.widget.RelativeLayout;
 import android.widget.SearchView;
 import android.widget.TextView;
@@ -61,6 +64,9 @@ import com.google.android.libraries.places.api.net.FindCurrentPlaceRequest;
 import com.google.android.libraries.places.api.net.FindCurrentPlaceResponse;
 import com.google.android.libraries.places.api.net.PlacesClient;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -121,6 +127,19 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
     private ListView lst; //this is the VIEW ONLY that is gonna DISPLAY THE LIST
     public static ArrayList<ListItem> itemsList = new ArrayList<ListItem>(); //this is the actual list containing ListItems
 
+
+    // Rating layout and contents
+    private ConstraintLayout rateLyt;
+    private RatingBar rateBr;
+    private EditText cmtTxt;
+    private Button subBtn;
+
+    /*
+    private static final String SHARED_PREFS = "sharedPrefs";
+    private static final String TEXT = "text";
+    private SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
+    private SharedPreferences.Editor editor = sharedPreferences.edit();
+    */
 
     private static final double EARTH_RADIUS = 6378100;
     private LatLng origin;
@@ -533,11 +552,54 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
             }
         });
 
-
         setupData();
         setupList();
         setupListOnClickListener();
         initSearching();
+
+        // ******************************************** end of search layout stuff
+
+
+        // Comment and rating menu stuff
+        rateLyt = findViewById(R.id.ratingLayout);
+        rateLyt.setVisibility(View.VISIBLE);
+        rateBr = findViewById(R.id.ratingBar);
+        cmtTxt = findViewById(R.id.commentBox);
+        subBtn = findViewById(R.id.submitBtn);
+
+            // what happens when the user clicks the SUBMIT button after giving feedback
+        subBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int numStr;
+                String cmt;
+                String feedback;
+                numStr = (int) rateBr.getRating();
+                //Log.d("ratingTest",""+numStr);
+                cmt = cmtTxt.getText().toString();
+                //Log.d("ratingTest",cmt);
+
+                // for now the review only exists in the LogCat
+                feedback = "RATING: "+numStr+" STARS, COMMENT: "+cmt+" , For PATH from NODE "+startNode+" TO NODE "+endNode;
+                Log.d("rating", feedback);
+                //saveFeedback(feedback);
+                //Log.d("rating",sharedPreferences.getString(TEXT, ""));
+
+                /*
+                try {
+                    FileOutputStream fileOutputStream = openFileOutput(FILENAME, MODE_PRIVATE);
+                    fileOutputStream.write(review.getBytes());
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }*/
+
+                cmtTxt.getText().clear();
+                rateBr.setRating(0);
+                rateLyt.setVisibility(View.INVISIBLE);
+            }
+        });
 
 
         //mMap.setLatLngBoundsForCameraTarget(UOTTAWA);
@@ -805,10 +867,25 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
 
     }
 
+    /*
+    public void saveFeedback(String feedback){
+
+        if(!sharedPreferences.contains(TEXT)){
+            editor.putString(TEXT,"");
+        }
+
+        if(sharedPreferences.getString(TEXT, "") != "") {
+            feedback = sharedPreferences.getString(TEXT, "")+"\n"+feedback;
+        }
+        editor.putString(TEXT,feedback);
+        editor.commit();
+    } */
+
     @Override
     protected void onResume() {
         super.onResume();
         if(boo)
             setView();
     }
+  
 } //end of the whole thingy lol
