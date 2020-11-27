@@ -148,7 +148,7 @@ public class Indoor extends AppCompatActivity {
             if(nextBuilding!=Build.NUL) {
                 nextText.setVisibility(View.VISIBLE);
                 next.setEnabled(true);
-                if(backBuilding!=Build.OUT)
+                if(nextBuilding!=Build.OUT)
                     nextText.setText(nextBuilding+" Floor "+nextFloor);
                 else
                     nextText.setText("Exterior");
