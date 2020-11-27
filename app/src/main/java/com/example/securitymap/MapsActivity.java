@@ -113,6 +113,8 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
     private ImageButton emergency;
     private ImageButton menuOptionsButton;
     private ArrayList<Integer> path;
+    private ArrayList<Polyline> polyline;
+    static boolean boo;
 
     private ImageButton searchBtn; //this is the button to pop open the search and list window
 
@@ -159,8 +161,13 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         //return node
     //}
     public void setView(){
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng((180*nodesList.get(path.get(0)).y/EARTH_RADIUS/PI)+origin.latitude, (Math.toDegrees(nodesList.get(path.get(0)).x)/(EARTH_RADIUS*Math.cos(Math.toRadians(origin.latitude))))+origin.longitude), 30));
         pathProgress = Dijkstra.pathProgress;
+        int counter=0;
+        for(int i=0; i<=pathProgress; i++){
+            if(Dijkstra.pathBuildings.get(i)==Build.OUT&&(i==0||Dijkstra.pathBuildings.get(i-1)!=Build.OUT))
+                counter++;
+        }
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(polyline.get(counter).getPoints().get(0), 20));
         if(pathProgress!=0){
             backBuilding=Dijkstra.pathBuildings.get(pathProgress-1);
             backFloor=Dijkstra.pathFloors.get(pathProgress-1);
@@ -195,7 +202,7 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         if(nextBuilding!=Build.NUL) {
             nextText.setVisibility(View.VISIBLE);
             next.setEnabled(true);
-            if(backBuilding!=Build.OUT)
+            if(nextBuilding!=Build.OUT)
                 nextText.setText(nextBuilding+" Floor "+nextFloor);
             else
                 nextText.setText("Exterior");
@@ -247,7 +254,7 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         Dijkstra.pathProgress = 0;
         next.setVisibility(View.VISIBLE);
         back.setVisibility(View.VISIBLE);
-        ArrayList<Polyline> polyline = new ArrayList<>();
+        polyline = new ArrayList<>();
         PolylineOptions polylineOptions = new PolylineOptions();
         for (int i=0; i<path.size()-1; i++) {
             if(nodesList.get(path.get(i)).building==Build.OUT&&nodesList.get(path.get(i+1)).building==Build.OUT){
@@ -393,7 +400,7 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         mapFragment.getMapAsync(this);
 
         // IMPORTANT NEED TO REMOVE EVENTUALLY
-
+        boo = false;
     }
 
     private Marker cbyMarker;
@@ -454,9 +461,9 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
 
         final Menu menu = dropDownMenu.getMenu();
 
-        menu.add(0, 0, 0, "Mobilité réduite");
-        menu.add(0, 1, 0, "Chemin le plus chaud");
-        menu.add(0, 2, 0, "Déplacement libre");
+        menu.add(0, 0, 0, "Reduced Mobility");
+        menu.add(0, 1, 0, "Warmest");
+        menu.add(0, 2, 0, "None");
 
         menu.setGroupCheckable(0, true, true);
 
@@ -874,4 +881,11 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         editor.commit();
     } */
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(boo)
+            setView();
+    }
+  
 } //end of the whole thingy lol
