@@ -290,7 +290,12 @@ public class Indoor extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Dijkstra.pathProgress = backProgress;
-                setView(buildings.get(backBuilding), backFloor);
+                if(backBuilding!=Build.OUT)
+                    setView(buildings.get(backBuilding), backFloor);
+                else {
+                    MapsActivity.boo = true;
+                    finish();
+                }
             }
         });
 
@@ -298,7 +303,12 @@ public class Indoor extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Dijkstra.pathProgress = nextProgress;
-                setView(buildings.get(nextBuilding), nextFloor);
+                if(nextBuilding!=Build.OUT)
+                    setView(buildings.get(nextBuilding), nextFloor);
+                else {
+                    MapsActivity.boo = true;
+                    finish();
+                }
             }
         });
     }

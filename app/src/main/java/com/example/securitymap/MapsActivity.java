@@ -107,6 +107,7 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
     private ImageButton emergency;
     private ImageButton menuOptionsButton;
     private ArrayList<Integer> path;
+    static boolean boo;
 
     private ImageButton searchBtn; //this is the button to pop open the search and list window
 
@@ -140,8 +141,8 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         //return node
     //}
     public void setView(){
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng((180*nodesList.get(path.get(0)).y/EARTH_RADIUS/PI)+origin.latitude, (Math.toDegrees(nodesList.get(path.get(0)).x)/(EARTH_RADIUS*Math.cos(Math.toRadians(origin.latitude))))+origin.longitude), 30));
         pathProgress = Dijkstra.pathProgress;
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng((Math.toDegrees(nodesList.get(path.get(pathProgress)).y/EARTH_RADIUS))+origin.latitude, (Math.toDegrees(nodesList.get(path.get(pathProgress)).x)/(EARTH_RADIUS*Math.cos(Math.toRadians(origin.latitude))))+origin.longitude), 30));
         if(pathProgress!=0){
             backBuilding=Dijkstra.pathBuildings.get(pathProgress-1);
             backFloor=Dijkstra.pathFloors.get(pathProgress-1);
@@ -374,7 +375,7 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         mapFragment.getMapAsync(this);
 
         // IMPORTANT NEED TO REMOVE EVENTUALLY
-
+        boo = false;
     }
 
     private Marker cbyMarker;
@@ -435,9 +436,9 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
 
         final Menu menu = dropDownMenu.getMenu();
 
-        menu.add(0, 0, 0, "Mobilité réduite");
-        menu.add(0, 1, 0, "Chemin le plus chaud");
-        menu.add(0, 2, 0, "Déplacement libre");
+        menu.add(0, 0, 0, "Reduced Mobility");
+        menu.add(0, 1, 0, "Warmest");
+        menu.add(0, 2, 0, "None");
 
         menu.setGroupCheckable(0, true, true);
 
@@ -798,4 +799,10 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
 
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(boo)
+            setView();
+    }
 } //end of the whole thingy lol
