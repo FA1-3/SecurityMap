@@ -66,6 +66,8 @@ public class Indoor extends AppCompatActivity {
     private float initialY;
     private Button setStart;
     private Button cancelStart;
+    private Button startMap;
+    private Button startLocation;
 
     public void createBitmaps(){
 //        Log.d("taggg", "beginning gay loop "+building.name);
@@ -241,6 +243,10 @@ public class Indoor extends AppCompatActivity {
         setStart.setVisibility(View.INVISIBLE);
         cancelStart = findViewById(R.id.button2);
         cancelStart.setVisibility(View.INVISIBLE);
+        startMap = findViewById(R.id.button11);
+        startMap.setVisibility(View.INVISIBLE);
+        startLocation = findViewById(R.id.button10);
+        startLocation.setVisibility(View.INVISIBLE);
 
         if(type.equals("path")) {
             createBitmaps();
@@ -302,6 +308,21 @@ public class Indoor extends AppCompatActivity {
                         public void onClick(View v) {
                             MapsActivity.endNode = getClosestNode(building.name, floorBar.getProgress());
                             MapsActivity.choosingStart=true;
+                            directions.setVisibility(View.INVISIBLE);
+                            startMap.setVisibility(View.VISIBLE);
+                            startLocation.setVisibility(View.VISIBLE);
+                            startMap.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    finish();
+                                }
+                            });
+                            startLocation.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    //finish();
+                                }
+                            });
                         }
                     });
                 } else {
