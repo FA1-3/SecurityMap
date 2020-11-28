@@ -34,6 +34,7 @@ public class CSVFile {
                             building.lat2 = Float.parseFloat(row[4]);
                             building.lng2 = Float.parseFloat(row[5]);
                             building.dist = Double.parseDouble(row[6]);
+                            building.center = Integer.parseInt(row[7]);
                             building.floors = new ArrayList<Floor>();
                             buildings.put(building.name, building);
                         }
@@ -80,6 +81,8 @@ public class CSVFile {
                                     case 'X':
                                         node.att[i] = Attribute.EXIT;
                                         break;
+                                    case 'G':
+                                        node.att[i] = Attribute.BUILDING;
                                 }
                             }
                         }

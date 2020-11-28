@@ -101,6 +101,8 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
     private Button cancelStart;
     private Button next;
     private Button back;
+    private ImageButton pin;
+    private TextView dropPin;
     private int pathProgress;
     private int backProgress;
     private int nextProgress;
@@ -115,6 +117,9 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
     private ArrayList<Integer> path;
     private ArrayList<Polyline> polyline;
     static boolean boo;
+    static boolean choosingStart;
+    static boolean startpath;
+    private String mode;
 
     private ImageButton searchBtn; //this is the button to pop open the search and list window
 
@@ -125,6 +130,7 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
     private CheckBox bldChk; //check box to see only buildings
     private CheckBox plcChk; //check box to see only specific places/destinations
     private ListView lst; //this is the VIEW ONLY that is gonna DISPLAY THE LIST
+    private ArrayList<Attribute> attributes;
     public static ArrayList<ListItem> itemsList = new ArrayList<ListItem>(); //this is the actual list containing ListItems
 
 
@@ -160,100 +166,135 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
 
         //return node
     //}
-    public void setView(){
-        pathProgress = Dijkstra.pathProgress;
-        int counter=0;
-        for(int i=0; i<=pathProgress; i++){
-            if(Dijkstra.pathBuildings.get(i)==Build.OUT&&(i==0||Dijkstra.pathBuildings.get(i-1)!=Build.OUT))
-                counter++;
-        }
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(polyline.get(counter).getPoints().get(0), 20));
-        if(pathProgress!=0){
-            backBuilding=Dijkstra.pathBuildings.get(pathProgress-1);
-            backFloor=Dijkstra.pathFloors.get(pathProgress-1);
-            backProgress=pathProgress-1;
-        } else {
-            backBuilding = Build.NUL;
-            backFloor = -1;
-        }
-        if(pathProgress!=Dijkstra.pathBuildings.size()-1){
-            nextBuilding=Dijkstra.pathBuildings.get(pathProgress+1);
-            nextFloor=Dijkstra.pathFloors.get(pathProgress+1);
-            nextProgress=pathProgress+1;
-        } else {
-            nextBuilding = Build.NUL;
-            nextFloor = -1;
-        }
+    public void setView() {
+        if (mode.equals("path")) {
+            constraint.setVisibility(View.INVISIBLE);
+            rateLyt.setVisibility(View.INVISIBLE);
 
-        back.setVisibility(View.VISIBLE);
-        if(backBuilding!=Build.NUL) {
-            backText.setVisibility(View.VISIBLE);
-            back.setEnabled(true);
-            if(backBuilding!=Build.OUT)
-                backText.setText(backBuilding+" Floor "+backFloor);
-            else
-                backText.setText("Exterior");
+            pathProgress = Dijkstra.pathProgress;
+            int counter = 0;
+            for (int i = 0; i <= pathProgress; i++) {
+                if (Dijkstra.pathBuildings.get(i) == Build.OUT && (i == 0 || Dijkstra.pathBuildings.get(i - 1) != Build.OUT))
+                    counter++;
+            }
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(polyline.get(counter-1).getPoints().get(0), 20));
+            if (pathProgress != 0) {
+                backBuilding = Dijkstra.pathBuildings.get(pathProgress - 1);
+                backFloor = Dijkstra.pathFloors.get(pathProgress - 1);
+                backProgress = pathProgress - 1;
+            } else {
+                backBuilding = Build.NUL;
+                backFloor = -1;
+            }
+            if (pathProgress != Dijkstra.pathBuildings.size() - 1) {
+                nextBuilding = Dijkstra.pathBuildings.get(pathProgress + 1);
+                nextFloor = Dijkstra.pathFloors.get(pathProgress + 1);
+                nextProgress = pathProgress + 1;
+            } else {
+                nextBuilding = Build.NUL;
+                nextFloor = -1;
+            }
+
+            back.setVisibility(View.VISIBLE);
+            if (backBuilding != Build.NUL) {
+                backText.setVisibility(View.VISIBLE);
+                back.setEnabled(true);
+                if (backBuilding != Build.OUT)
+                    backText.setText(backBuilding + " Floor " + backFloor);
+                else
+                    backText.setText("Exterior");
+            } else {
+                backText.setVisibility(View.INVISIBLE);
+                back.setEnabled(false);
+            }
+
+            next.setVisibility(View.VISIBLE);
+            if (nextBuilding != Build.NUL) {
+                nextText.setVisibility(View.VISIBLE);
+                next.setText("Next");
+                next.setEnabled(true);
+                if (nextBuilding != Build.OUT)
+                    nextText.setText(nextBuilding + " Floor " + nextFloor);
+                else
+                    nextText.setText("Exterior");
+            } else {
+                nextText.setVisibility(View.INVISIBLE);
+                next.setText("End");
+                next.setEnabled(true);
+            }
+
+            back.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (rateLyt.getVisibility() == View.VISIBLE) {
+                        rateLyt.setVisibility(View.INVISIBLE);
+                    } else {
+                        Dijkstra.pathProgress = backProgress;
+                        if (backBuilding != Build.NUL) {
+                            if (Dijkstra.pathBuildings.get(backProgress) == Build.OUT) {
+                                setView();
+                            } else {
+                                intent.putExtra("type", "path");
+                                intent.putExtra("building", String.valueOf(backBuilding));
+                                intent.putExtra("floor", backFloor);
+                                startActivity(intent);
+                            }
+                        }
+                    }
+                }
+            });
+
+            next.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Dijkstra.pathProgress = nextProgress;
+                    if (nextBuilding != Build.NUL) {
+                        if (Dijkstra.pathBuildings.get(nextProgress) == Build.OUT) {
+                            setView();
+                        } else {
+                            intent.putExtra("type", "path");
+                            intent.putExtra("building", String.valueOf(nextBuilding));
+                            Log.d("outside", String.valueOf(nextBuilding));
+                            intent.putExtra("floor", nextFloor);
+                            Log.d("outside", String.valueOf(nextFloor));
+                            startActivity(intent);
+                        }
+                    } else {
+                        launchRating();
+                    }
+                }
+            });
         } else {
+            if(choosingStart) {
+                setStart.setVisibility(View.VISIBLE);
+                cancelStart.setVisibility(View.VISIBLE);
+            }
+            rateLyt.setVisibility(View.INVISIBLE);
+            constraint.setVisibility(View.INVISIBLE);
+            back.setVisibility(View.INVISIBLE);
+            next.setVisibility(View.INVISIBLE);
             backText.setVisibility(View.INVISIBLE);
-            back.setEnabled(false);
-        }
-
-        next.setVisibility(View.VISIBLE);
-        if(nextBuilding!=Build.NUL) {
-            nextText.setVisibility(View.VISIBLE);
-            next.setEnabled(true);
-            if(nextBuilding!=Build.OUT)
-                nextText.setText(nextBuilding+" Floor "+nextFloor);
-            else
-                nextText.setText("Exterior");
-        } else {
             nextText.setVisibility(View.INVISIBLE);
-            next.setEnabled(false);
+            dropPin.setVisibility(View.VISIBLE);
+            pin.setVisibility(View.VISIBLE);
+            if(!polyline.isEmpty()){
+                for (Polyline poly:polyline) {
+                    poly.remove();
+                }
+            }
         }
 
-        back.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Dijkstra.pathProgress = backProgress;
-                if (backBuilding != Build.NUL) {
-                    if (Dijkstra.pathBuildings.get(backProgress) == Build.OUT) {
-                        setView();
-                    } else {
-                        intent.putExtra("type", "path");
-                        intent.putExtra("building", String.valueOf(backBuilding));
-                        intent.putExtra("floor", backFloor);
-                        startActivity(intent);
-                    }
-                }
-            }
-        });
-
-        next.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Dijkstra.pathProgress = nextProgress;
-                if (nextBuilding != Build.NUL) {
-                    if (Dijkstra.pathBuildings.get(nextProgress) == Build.OUT) {
-                        setView();
-                    } else {
-                        intent.putExtra("type", "path");
-                        intent.putExtra("building", String.valueOf(nextBuilding));
-                        Log.d("outside", String.valueOf(nextBuilding));
-                        intent.putExtra("floor", nextFloor);
-                        Log.d("outside", String.valueOf(nextFloor));
-                        startActivity(intent);
-                    }
-                }
-            }
-        });
     }
 
     public void startPath(){
-        Dijkstra.calculatePath(nodesList, startNode, endNode);
+        mode = "path";
+        Dijkstra.calculatePath(nodesList, startNode, endNode, attributes);
         path = Dijkstra.path;
         Dijkstra.pathProgress = 0;
         next.setVisibility(View.VISIBLE);
+        nextText.setVisibility(View.VISIBLE);
         back.setVisibility(View.VISIBLE);
+        backText.setVisibility(View.VISIBLE);
         polyline = new ArrayList<>();
         PolylineOptions polylineOptions = new PolylineOptions();
         for (int i=0; i<path.size()-1; i++) {
@@ -301,6 +342,10 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         clickMessage.setVisibility(View.INVISIBLE);
         startMap.setVisibility(View.INVISIBLE);
         startLocation.setVisibility(View.INVISIBLE);
+        next.setVisibility(View.INVISIBLE);
+        back.setVisibility(View.INVISIBLE);
+        nextText.setVisibility(View.INVISIBLE);
+        backText.setVisibility(View.INVISIBLE);
         buildingName.setText(intent.getStringExtra("building"));
         setStart.setEnabled(true);
         setStart.setOnClickListener(new View.OnClickListener() {
@@ -351,13 +396,14 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
                                 nearby.add(building1);
                             }
                         }
-
+                        //In which building r u kinda vibe
 
                     }
                 });
                 startMap.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        choosingStart=true;
                         constraint.setVisibility(View.INVISIBLE);
                         setStart.setVisibility(View.VISIBLE);
                         setStart.setEnabled(false);
@@ -366,6 +412,7 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
                         cancelStart.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
+                                choosingStart = false;
                                 constraint.setVisibility(View.VISIBLE);
                                 setStart.setVisibility(View.INVISIBLE);
                                 cancelStart.setVisibility(View.INVISIBLE);
@@ -401,6 +448,9 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
 
         // IMPORTANT NEED TO REMOVE EVENTUALLY
         boo = false;
+        attributes = new ArrayList<>();
+        attributes.add(Attribute.BUILDING);
+        attributes.add(Attribute.STAIR);
     }
 
     private Marker cbyMarker;
@@ -422,6 +472,7 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         RelativeLayout layout = (RelativeLayout) findViewById(R.id.relative);
         width = layout.getWidth();
         height = layout.getHeight();
+        polyline = new ArrayList<>();
 
         constraint = (ConstraintLayout) findViewById(R.id.constraint1);
         constraint.setVisibility(View.INVISIBLE);
@@ -441,6 +492,8 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         next.setVisibility(View.INVISIBLE);
         back = (Button)findViewById(R.id.button8);
         back.setVisibility(View.INVISIBLE);
+        dropPin = findViewById(R.id.textView16);
+        pin = findViewById(R.id.imageButton7);
         backText = (TextView) findViewById(R.id.textView11);
         backText.setVisibility(View.INVISIBLE);
         nextText = (TextView) findViewById(R.id.textView12);
@@ -474,6 +527,7 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
                 switch (item.getItemId()) {
                     case 0:
                         // "Mobilité réduite" was selected -> computes shortest path accordingly;
+                        attributes.add(Attribute.STAIR);
                         return true;
                     case 1:
                         // "Chemin le plus chaud" was selected -> computes shortest path accordingly
@@ -502,7 +556,7 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         LatLng ste = new LatLng(45.419308, -75.678701);
         LatLng stm = new LatLng(45.420319, -75.680508);
         LatLng lpr = new LatLng(45.421250, -75.680353);
-        LatLng hs = new LatLng(45.421755, -75.679601);
+        LatLng hs = new LatLng(45.421762, -75.680357);
         LatLng is = new LatLng(45.424537, -75.686460);
         LatLng cp = new LatLng(45.421764, -75.680541);
 
@@ -559,47 +613,11 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
 
         // ******************************************** end of search layout stuff
 
-
-        // Comment and rating menu stuff
         rateLyt = findViewById(R.id.ratingLayout);
-        rateLyt.setVisibility(View.VISIBLE);
+        rateLyt.setVisibility(View.INVISIBLE);
         rateBr = findViewById(R.id.ratingBar);
         cmtTxt = findViewById(R.id.commentBox);
         subBtn = findViewById(R.id.submitBtn);
-
-            // what happens when the user clicks the SUBMIT button after giving feedback
-        subBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int numStr;
-                String cmt;
-                String feedback;
-                numStr = (int) rateBr.getRating();
-                //Log.d("ratingTest",""+numStr);
-                cmt = cmtTxt.getText().toString();
-                //Log.d("ratingTest",cmt);
-
-                // for now the review only exists in the LogCat
-                feedback = "RATING: "+numStr+" STARS, COMMENT: "+cmt+" , For PATH from NODE "+startNode+" TO NODE "+endNode;
-                Log.d("rating", feedback);
-                //saveFeedback(feedback);
-                //Log.d("rating",sharedPreferences.getString(TEXT, ""));
-
-                /*
-                try {
-                    FileOutputStream fileOutputStream = openFileOutput(FILENAME, MODE_PRIVATE);
-                    fileOutputStream.write(review.getBytes());
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }*/
-
-                cmtTxt.getText().clear();
-                rateBr.setRating(0);
-                rateLyt.setVisibility(View.INVISIBLE);
-            }
-        });
 
 
         //mMap.setLatLngBoundsForCameraTarget(UOTTAWA);
@@ -630,10 +648,11 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(defaultLocation, DEFAULT_ZOOM));
 
         //srcSetupData();
-
-        startNode = 5001;
+        mode = "browse";
+        setView();
+        /*startNode = 5001;
         endNode = 5040;
-        startPath();
+        startPath();*/
     } // End of the onMapReady
 
     private void getDeviceLocation() {
@@ -840,7 +859,7 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         }
 
         if(bldChkChecked && !plcChkChecked){
-            ArrayList<ListItem> filteredItems = new ArrayList<ListItem>();
+            ArrayList<ListItem> filteredItems = new ArrayList<>();
             for (ListItem listItem: itemsList){ //goes through the entire initial list
                 if (listItem.getId().toLowerCase() == "building"){
                     filteredItems.add(listItem);
@@ -852,7 +871,7 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         }
 
         if(plcChkChecked && !bldChkChecked){
-            ArrayList<ListItem> filteredItems = new ArrayList<ListItem>();
+            ArrayList<ListItem> filteredItems = new ArrayList<>();
             for (ListItem listItem: itemsList){ //goes through the entire initial list
                 if (listItem.getId().toLowerCase() == "place"){
                     filteredItems.add(listItem);
@@ -865,6 +884,45 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
 
 
 
+    }
+
+    public void launchRating(){
+        // Comment and rating menu stuff
+        rateLyt.setVisibility(View.VISIBLE);
+        // what happens when the user clicks the SUBMIT button after giving feedback
+        subBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int numStr;
+                String cmt;
+                String feedback;
+                numStr = (int) rateBr.getRating();
+                //Log.d("ratingTest",""+numStr);
+                cmt = cmtTxt.getText().toString();
+                //Log.d("ratingTest",cmt);
+
+                // for now the review only exists in the LogCat
+                feedback = "RATING: "+numStr+" STARS, COMMENT: "+cmt+" , For PATH from NODE "+startNode+" TO NODE "+endNode;
+                Log.d("rating", feedback);
+                //saveFeedback(feedback);
+                //Log.d("rating",sharedPreferences.getString(TEXT, ""));
+
+                /*
+                try {
+                    FileOutputStream fileOutputStream = openFileOutput(FILENAME, MODE_PRIVATE);
+                    fileOutputStream.write(review.getBytes());
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }*/
+
+                cmtTxt.getText().clear();
+                rateBr.setRating(0);
+                rateLyt.setVisibility(View.INVISIBLE);
+                setView();
+            }
+        });
     }
 
     /*
@@ -886,6 +944,9 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         super.onResume();
         if(boo)
             setView();
+        else if(startpath)
+            startPath();
+        //else if(choosingStart)
     }
   
 } //end of the whole thingy lol

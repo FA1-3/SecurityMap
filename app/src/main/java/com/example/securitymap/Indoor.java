@@ -64,6 +64,8 @@ public class Indoor extends AppCompatActivity {
     private TextView dropPin;
     private ConstraintLayout constraint;
     private float initialY;
+    private Button setStart;
+    private Button cancelStart;
 
     public void createBitmaps(){
 //        Log.d("taggg", "beginning gay loop "+building.name);
@@ -108,7 +110,11 @@ public class Indoor extends AppCompatActivity {
         buildingText.setText(String.valueOf(building.name));
         String imageName = String.valueOf(building.name).toLowerCase()+floorNum;
         floorPlan.setImageResource(getResources().getIdentifier(imageName, "drawable",  getPackageName()));
-
+        if(MapsActivity.choosingStart){
+            setStart.setVisibility(View.VISIBLE);
+            setStart.setEnabled(false);
+            cancelStart.setVisibility(View.VISIBLE);
+        }
 
 
         if(type.equals("path")) {
@@ -229,6 +235,10 @@ public class Indoor extends AppCompatActivity {
         dropPin.setText("Drop Pin");
         constraint = (ConstraintLayout) findViewById(R.id.constraint1);
         constraint.setVisibility(View.INVISIBLE);
+        setStart = findViewById(R.id.button4);
+        setStart.setVisibility(View.INVISIBLE);
+        cancelStart = findViewById(R.id.button2);
+        cancelStart.setVisibility(View.INVISIBLE);
 
         if(type.equals("path")) {
             createBitmaps();
@@ -272,18 +282,30 @@ public class Indoor extends AppCompatActivity {
             public void onClick(View v) {
                 if(dropPin.getText()=="Drop Pin"){
                     pin.setVisibility(View.VISIBLE);
+                    setStart.setEnabled(true);
+                    setStart.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            MapsActivity.choosingStart = false;
+                            MapsActivity.startNode = getClosestNode(building.name, floorBar.getProgress());
+                            MapsActivity.startpath = true;
+                            finish();
+                        }
+                    });
                     dropPin.setText("Remove Pin");
                     directions.setEnabled(true);
                     directions.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            Log.d("closest", String.valueOf(getClosestNode(building.name, floor)));
+                            MapsActivity.endNode = getClosestNode(building.name, floorBar.getProgress());
+                            MapsActivity.choosingStart=true;
                         }
                     });
                 } else {
                     pin.setVisibility(View.INVISIBLE);
                     dropPin.setText("Drop Pin");
                     directions.setEnabled(false);
+                    setStart.setEnabled(false);
                 }
             }
         });
