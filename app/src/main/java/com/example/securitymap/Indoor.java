@@ -115,6 +115,8 @@ public class Indoor extends AppCompatActivity {
             setStart.setEnabled(false);
             cancelStart.setVisibility(View.VISIBLE);
         }
+        if(pin.getVisibility()==View.VISIBLE)
+            setStart.setVisibility(View.VISIBLE);
 
 
         if(type.equals("path")) {
@@ -273,6 +275,7 @@ public class Indoor extends AppCompatActivity {
         goBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                MapsActivity.mode = "exit";
                 finish();
             }
         });

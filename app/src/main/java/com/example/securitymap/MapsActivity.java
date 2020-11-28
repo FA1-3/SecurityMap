@@ -119,7 +119,7 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
     static boolean boo;
     static boolean choosingStart;
     static boolean startpath;
-    private String mode;
+    static String mode;
 
     private ImageButton searchBtn; //this is the button to pop open the search and list window
 
@@ -174,8 +174,9 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
             pathProgress = Dijkstra.pathProgress;
             int counter = 0;
             for (int i = 0; i <= pathProgress; i++) {
-                if (Dijkstra.pathBuildings.get(i) == Build.OUT && (i == 0 || Dijkstra.pathBuildings.get(i - 1) != Build.OUT))
+                if (Dijkstra.pathBuildings.get(i) == Build.OUT && (i == 0 || Dijkstra.pathBuildings.get(i - 1) != Build.OUT)) {
                     counter++;
+                }
             }
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(polyline.get(counter-1).getPoints().get(0), 20));
             if (pathProgress != 0) {
@@ -308,7 +309,7 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
                 }
                 Log.d("outside", i+"toute");
                 polylineOptions.add(new LatLng((Math.toDegrees(nodesList.get(path.get(i+1)).y/EARTH_RADIUS))+origin.latitude, (Math.toDegrees(nodesList.get(path.get(i+1)).x)/(EARTH_RADIUS*Math.cos(Math.toRadians(origin.latitude))))+origin.longitude));
-            } else if(i>1&&nodesList.get(path.get(i-1)).building==Build.OUT&&nodesList.get(path.get(i-2)).building==Build.OUT){
+            } else if(i>1&&nodesList.get(path.get(i)).building==Build.OUT&&nodesList.get(path.get(i-1)).building==Build.OUT){
                 polyline.add(mMap.addPolyline(polylineOptions));
                 Log.d("outside", i+"toutee");
             }
@@ -449,8 +450,6 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         // IMPORTANT NEED TO REMOVE EVENTUALLY
         boo = false;
         attributes = new ArrayList<>();
-        attributes.add(Attribute.BUILDING);
-        attributes.add(Attribute.STAIR);
     }
 
     private Marker cbyMarker;
@@ -527,13 +526,15 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
                 switch (item.getItemId()) {
                     case 0:
                         // "Mobilité réduite" was selected -> computes shortest path accordingly;
-                        attributes.add(Attribute.STAIR);
+                        if(!attributes.contains(Attribute.STAIR))
+                            attributes.add(Attribute.STAIR);
                         return true;
                     case 1:
                         // "Chemin le plus chaud" was selected -> computes shortest path accordingly
                         return true;
                     case 2:
                         // "Déplacement libre" was selected -> computes shortest path accordingly
+                        attributes.remove(Attribute.STAIR);
                         return true;
                 }
                 return false;
@@ -645,14 +646,14 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         updateLocationUI();
         getDeviceLocation();
         googleMap.setOnMarkerClickListener(this);
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(defaultLocation, DEFAULT_ZOOM));
+        //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(defaultLocation, DEFAULT_ZOOM));
 
         //srcSetupData();
         mode = "browse";
-        setView();
-        /*startNode = 5001;
-        endNode = 5040;
-        startPath();*/
+        //setView();
+        startNode = 11;
+        endNode = 5090;
+        startPath();
     } // End of the onMapReady
 
     private void getDeviceLocation() {
@@ -736,23 +737,25 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
 
         @Override
     public boolean onMarkerClick(Marker marker) {
-        intent.putExtra("type", "browse");
-        intent.putExtra("building", "");
-        if(marker.equals(cbyMarker)) {
-            intent.putExtra("building", "CBY");
-            intent.putExtra("floor", 1);
-        }
+        if(!mode.equals("path")) {
+            intent.putExtra("type", "browse");
+            intent.putExtra("building", "");
+            if (marker.equals(cbyMarker)) {
+                intent.putExtra("building", "CBY");
+                intent.putExtra("floor", 1);
+            }
 
-        if(marker.equals(steMarker)) {
-            intent.putExtra("building", "STE");
-            intent.putExtra("floor", 1);
-        }
+            if (marker.equals(steMarker)) {
+                intent.putExtra("building", "STE");
+                intent.putExtra("floor", 1);
+            }
 
-        if(marker.equals(stmMarker)) {
-            intent.putExtra("building", "STM");
-            intent.putExtra("floor", 2);
+            if (marker.equals(stmMarker)) {
+                intent.putExtra("building", "STM");
+                intent.putExtra("floor", 2);
+            }
+            launchPreview();
         }
-        launchPreview();
         return false;
 
     } // end of the OnMarkerClick {}
@@ -785,24 +788,24 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         LatLng cpLL = new LatLng(45.421764, -75.680541);
 
         //Buildings
-        ListItem cby = new ListItem("building","Colonel By","cby",-1,0,-1, cbyLL);
-        ListItem ste = new ListItem("building","SITE","ste",-1,1,-1, steLL);
-        ListItem stm = new ListItem("building","STEM","stm",-1,2,-1, stmLL);
-        ListItem mrn = new ListItem("building","Marion","mrn",-1,3,-1, mrnLL);
-        ListItem hml = new ListItem("building","Hamelin","hml",-1,4,-1, hmlLL);
+        ListItem cby = new ListItem("building","Colonel By","cby",1,0,-1, cbyLL);
+        ListItem ste = new ListItem("building","SITE","ste",1,1,-1, steLL);
+        ListItem stm = new ListItem("building","STEM","stm",2,2,-1, stmLL);
+        ListItem mrn = new ListItem("building","Marion","mrn",1,3,-1, mrnLL);
+        ListItem hml = new ListItem("building","Hamelin","hml",1,4,-1, hmlLL);
         ListItem crx = new ListItem("building","Learning Crossroads","crx",-1,5,-1, crxLL);
-        ListItem van = new ListItem("building","Vanier","van",-1,6,-1, vanLL);
-        ListItem ftx = new ListItem("building","Fauteux","ftx",-1,7,-1, ftxLL);
-        ListItem dir = new ListItem("building","D'Iorio","dir",-1,8,-1, dirLL);
-        ListItem tbt = new ListItem("building", "Tabaret Hall", "TBT", -1, 12, -1, tbtLL);
+        ListItem van = new ListItem("building","Vanier","van",1,6,-1, vanLL);
+        ListItem ftx = new ListItem("building","Fauteux","ftx",1,7,-1, ftxLL);
+        ListItem dir = new ListItem("building","D'Iorio","dir",1,8,-1, dirLL);
+        ListItem tbt = new ListItem("building", "Tabaret Hall", "TBT", 1, 12, -1, tbtLL);
 
 
         //HAVE TO ADD THE NODE NUMBERS TO ALL THE PLACES!!!!!!!!!!!
         //Places
-        ListItem lpr = new ListItem("place", "Protection Services (LPR)", "out", -1,9, 5074, lprLL);
-        ListItem hs = new ListItem("place", "Health Services", "OUT", -1, 10, 5076, hsLL);
+        ListItem lpr = new ListItem("place", "Protection Services (LPR)", "out", 1,9, 5074, lprLL);
+        ListItem hs = new ListItem("place", "Health Services", "OUT", 1, 10, 5076, hsLL);
         ListItem is = new ListItem("place", "Information Services", "TBT", 1,11,5090, isLL);
-        ListItem cp = new ListItem("place", "Campus Pharmacy", "OUT", -1, 13, 5076, cpLL);
+        ListItem cp = new ListItem("place", "Campus Pharmacy", "OUT", 1, 13, 5076, cpLL);
 
         itemsList.add(cby);
         itemsList.add(ste);
@@ -840,9 +843,11 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
 
                 // fills this ListItem object with the one that was clicked
                 ListItem selectedItem = (ListItem) (lst.getItemAtPosition(position));
-
-                // This is useless and I need to add in a feature for that
-                Intent itemWasClicked = new Intent(getApplicationContext(), MapsActivity.class);
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(selectedItem.getCoords(), 17));
+                intent.putExtra("type", "browse");
+                intent.putExtra("building", selectedItem.getBuilding().toUpperCase());
+                intent.putExtra("floor", selectedItem.getFloor());
+                launchPreview();
 
             }
         });
@@ -929,6 +934,12 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
                 String cmt;
                 String feedback;
                 numStr = (int) rateBr.getRating();
+                mode = "browse";
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(defaultLocation, 15));
+                boo = false;
+                choosingStart = false;
+                startpath = false;
+
                 //Log.d("ratingTest",""+numStr);
                 cmt = cmtTxt.getText().toString();
                 //Log.d("ratingTest",cmt);
