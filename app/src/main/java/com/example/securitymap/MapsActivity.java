@@ -5,14 +5,10 @@ import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 
-import android.content.Context;
+
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -20,7 +16,6 @@ import android.graphics.Color;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -31,7 +26,6 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RatingBar;
 import android.widget.RelativeLayout;
@@ -46,10 +40,8 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -57,19 +49,9 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
-import com.google.android.libraries.places.api.Places;
-import com.google.android.libraries.places.api.model.Place;
-import com.google.android.libraries.places.api.model.PlaceLikelihood;
-import com.google.android.libraries.places.api.net.FindCurrentPlaceRequest;
-import com.google.android.libraries.places.api.net.FindCurrentPlaceResponse;
-import com.google.android.libraries.places.api.net.PlacesClient;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
@@ -119,6 +101,7 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
     static boolean boo;
     static boolean choosingStart;
     static boolean startpath;
+    static boolean rating;
     static String mode;
     private Marker pinMarker;
     private Button pinDirections;
@@ -335,8 +318,8 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         backText.setVisibility(View.VISIBLE);
         polyline = new ArrayList<>();
         PolylineOptions polylineOptions = new PolylineOptions();
-        for (int i=0; i<path.size()-1; i++) {
-            if(nodesList.get(path.get(i)).building==Build.OUT&&nodesList.get(path.get(i+1)).building==Build.OUT){
+        for (int i=0; i<path.size(); i++) {
+            if(i<path.size()-1&&(nodesList.get(path.get(i)).building==Build.OUT&&nodesList.get(path.get(i+1)).building==Build.OUT)){
                 if(i == 0 || nodesList.get(path.get(i - 1)).building != Build.OUT) {
                     polylineOptions = new PolylineOptions();
                     polylineOptions.color(Color.RED);
@@ -350,7 +333,9 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
                 polyline.add(mMap.addPolyline(polylineOptions));
                 Log.d("outside", i+"toutee");
             }
-            if(i==path.size()-2&&i>1&&nodesList.get(path.get(i-1)).building==Build.OUT&&(nodesList.get(path.get(i-2)).building==Build.OUT||nodesList.get(path.get(i)).building==Build.OUT)){
+            if(i==path.size()-1&&i>1&&nodesList.get(path.get(i)).building==Build.OUT){
+                if(nodesList.get(path.get(i-1)).building!=Build.OUT)
+                    polylineOptions.add(new LatLng((Math.toDegrees(nodesList.get(path.get(i)).y/EARTH_RADIUS))+origin.latitude, (Math.toDegrees(nodesList.get(path.get(i)).x)/(EARTH_RADIUS*Math.cos(Math.toRadians(origin.latitude))))+origin.longitude));
                 polyline.add(mMap.addPolyline(polylineOptions));
                 Log.d("outside", i + "touteee");
             }
@@ -398,14 +383,15 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
             setStart.setVisibility(View.INVISIBLE);
             cancelStart.setVisibility(View.INVISIBLE);
             pinDirections.setVisibility(View.INVISIBLE);
+        } else {
+            setStart.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    startNode = buildings.get(Build.valueOf(intent.getStringExtra("building"))).center;
+                    startPath();
+                }
+            });
         }
-        setStart.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startNode = buildings.get(Build.valueOf(intent.getStringExtra("building"))).center;
-                startPath();
-            }
-        });
 
         direction.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -499,6 +485,7 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
 
         // IMPORTANT NEED TO REMOVE EVENTUALLY
         boo = false;
+        rating=false;
         attributes = new ArrayList<>();
     }
 
@@ -605,6 +592,13 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
                             setStart.setEnabled(false);
                             cancelStart.setVisibility(View.VISIBLE);
                             launchPreview();
+                        }
+                    });
+                    setStart.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            startNode = getClosestNode(pinMarker.getPosition());
+                            startPath();
                         }
                     });
                 }
@@ -915,10 +909,10 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
 
         //HAVE TO ADD THE NODE NUMBERS TO ALL THE PLACES!!!!!!!!!!!
         //Places
-        ListItem lpr = new ListItem("place", "Protection Services (LPR)", "OUT", 1,9, 5074, lprLL);
-        ListItem hs = new ListItem("place", "Health Services", "OUT", 1, 10, 5076, hsLL);
-        ListItem is = new ListItem("place", "Information Services", "TBT", 1,11,5090, isLL);
-        ListItem cp = new ListItem("place", "Campus Pharmacy", "OUT", 1, 13, 5076, cpLL);
+        lpr = new ListItem("place", "Protection Services (LPR)", "OUT", 1,9, 5074, lprLL);
+        hs = new ListItem("place", "Health Services", "OUT", 1, 10, 5076, hsLL);
+        is = new ListItem("place", "Information Services", "TBT", 1,11,5090, isLL);
+        cp = new ListItem("place", "Campus Pharmacy", "OUT", 1, 13, 5076, cpLL);
 
         itemsList.add(cby);
         itemsList.add(ste);
@@ -1102,7 +1096,10 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
     @Override
     protected void onResume() {
         super.onResume();
-        if(boo)
+        if(rating){
+            launchRating();
+        }
+        else if(boo)
             setView();
         else if(startpath)
             startPath();
