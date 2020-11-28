@@ -488,7 +488,7 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         rating=false;
         attributes = new ArrayList<>();
     }
-
+    //first set of markers
     private Marker cbyMarker;
     private Marker steMarker;
     private Marker stmMarker;
@@ -496,6 +496,14 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
     private Marker hsMarker;
     private Marker isMarker;
     private Marker cpMarker;
+    //2nd set of markers below
+    private Marker mrnMarker; // Marion
+    private Marker crxMarker; // CRX, duh lol
+    private Marker vanMarker; // Vanier Hall
+    private Marker ftxMarker; //Fauteux
+    private Marker dirMarker; //D'Iorio
+    private Marker tbtMarker; //Tabaret Hall
+    private Marker hmlMarker; // Hamelin Hall
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -652,25 +660,53 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         });
 
         origin = new LatLng(45.419513, -75.678796);
-        Bitmap b = BitmapFactory.decodeResource(getResources(), R.drawable.building_icon);
-        Bitmap smallMarker = Bitmap.createScaledBitmap(b, 100, 100, false);
+
+        Bitmap b = BitmapFactory.decodeResource(getResources(), R.drawable.building_icon_2);
+        Bitmap smallMarker = Bitmap.createScaledBitmap(b, 103, 150, false);
         BitmapDescriptor smallMarkerIcon = BitmapDescriptorFactory.fromBitmap(smallMarker);
+
+        Bitmap c = BitmapFactory.decodeResource(getResources(), R.drawable.health_service_icon);
+        Bitmap healthMarker = Bitmap.createScaledBitmap(c, 103, 150, false);
+        BitmapDescriptor healthMarkerIcon = BitmapDescriptorFactory.fromBitmap(healthMarker);
+
+        Bitmap d = BitmapFactory.decodeResource(getResources(), R.drawable.info_icon);
+        Bitmap infoMarker = Bitmap.createScaledBitmap(d, 103, 150, false);
+        BitmapDescriptor infoMarkerIcon = BitmapDescriptorFactory.fromBitmap(infoMarker);
+
+        Bitmap e = BitmapFactory.decodeResource(getResources(), R.drawable.check_icon);
+        Bitmap checkMarker = Bitmap.createScaledBitmap(e, 103, 150, false);
+        BitmapDescriptor checkMarkerIcon = BitmapDescriptorFactory.fromBitmap(checkMarker);
 
         LatLng cby = new LatLng(45.419754, -75.679601);
         LatLng ste = new LatLng(45.419308, -75.678701);
         LatLng stm = new LatLng(45.420319, -75.680508);
+        LatLng mrn = new LatLng(45.42052646805507, -75.681055736891);
+        LatLng hml = new LatLng(45.42387081051715, -75.68587101939168);
+        LatLng crx = new LatLng(45.42202898302483, -75.68181090791289);
+        LatLng van = new LatLng(45.42148723256023, -75.68340224794174);
+        LatLng ftx = new LatLng(45.42374905438684, -75.6825786648393);
+        LatLng dir = new LatLng(45.42095375422315, -75.68130497413767);
+        LatLng tbt = new LatLng(45.424540235601334, -75.68633147106046);
+
         LatLng lpr = new LatLng(45.421250, -75.680353);
         LatLng hs = new LatLng(45.421762, -75.680357);
         LatLng is = new LatLng(45.424537, -75.686460);
         LatLng cp = new LatLng(45.421764, -75.680541);
 
         cbyMarker = mMap.addMarker(new MarkerOptions().position(cby).title("Colonel By Hall (CBY)").icon(smallMarkerIcon));
-        steMarker = mMap.addMarker(new MarkerOptions().position(ste).title("SITE (STE)"));
-        stmMarker = mMap.addMarker(new MarkerOptions().position(stm).title("STEM (STM)"));
-        lprMarker = mMap.addMarker(new MarkerOptions().position(lpr).title("Protection Services (LPR)"));
-        hsMarker = mMap.addMarker(new MarkerOptions().position(hs).title("Health Services"));
-        isMarker = mMap.addMarker(new MarkerOptions().position(is).title("Info Service"));
-        cpMarker = mMap.addMarker(new MarkerOptions().position(cp).title("Campus Pharmacy"));
+        steMarker = mMap.addMarker(new MarkerOptions().position(ste).title("SITE (STE)").icon(smallMarkerIcon));
+        stmMarker = mMap.addMarker(new MarkerOptions().position(stm).title("STEM (STM)").icon(smallMarkerIcon));
+        mrnMarker = mMap.addMarker(new MarkerOptions().position(mrn).title("Marion Hall (MRN)").icon(smallMarkerIcon));
+        crxMarker = mMap.addMarker(new MarkerOptions().position(crx).title("Learning Crossroads (CRX)").icon(smallMarkerIcon));
+        ftxMarker = mMap.addMarker(new MarkerOptions().position(ftx).title("Fauteux Hall (FTX)").icon(smallMarkerIcon));
+        vanMarker = mMap.addMarker(new MarkerOptions().position(van).title("Vanier Hall (VNR)").icon(smallMarkerIcon));
+        dirMarker = mMap.addMarker(new MarkerOptions().position(dir).title("D'Iorio Hall (DRO)").icon(smallMarkerIcon));
+        tbtMarker = mMap.addMarker(new MarkerOptions().position(tbt).title("Tabaret Hall (TBT)").icon(smallMarkerIcon));
+
+        lprMarker = mMap.addMarker(new MarkerOptions().position(lpr).title("Protection Services (LPR)").icon(checkMarkerIcon));
+        hsMarker = mMap.addMarker(new MarkerOptions().position(hs).title("Health Services").icon(healthMarkerIcon));
+        isMarker = mMap.addMarker(new MarkerOptions().position(is).title("Info Service").icon(infoMarkerIcon));
+        cpMarker = mMap.addMarker(new MarkerOptions().position(cp).title("Campus Pharmacy").icon(healthMarkerIcon));
 
 
         // Stuff for the search bar layout
@@ -855,8 +891,53 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
             if (marker.equals(stmMarker)) {
                 selectedItem = stm;
             }
+
+            if (marker.equals(mrnMarker)) {
+                selectedItem = mrn;
+            }
+
+            if (marker.equals(hmlMarker)) {
+                selectedItem = hml;
+            }
+
+            if (marker.equals(crxMarker)) {
+                selectedItem = crx;
+            }
+
+            if (marker.equals(vanMarker)) {
+                selectedItem = van;
+            }
+
+            if (marker.equals(ftxMarker)) {
+                selectedItem = ftx;
+            }
+
+            if (marker.equals(dirMarker)) {
+                selectedItem = dir;
+            }
+
+            if (marker.equals(tbtMarker)) {
+                selectedItem = tbt;
+            }
+
+            if (marker.equals(lprMarker)) {
+                selectedItem = lpr;
+            }
+
+            if (marker.equals(isMarker)) {
+                selectedItem = is;
+            }
+
+            if (marker.equals(hsMarker)) {
+                selectedItem = hs;
+            }
+
+            if (marker.equals(cpMarker)) {
+                selectedItem = cp;
+            }
+
             String name = selectedItem.getName();
-            if (!selectedItem.getName().equals("OUT"))
+            if (!selectedItem.getBuilding().equals("OUT"))
                 name = name+" ("+selectedItem.getBuilding().toUpperCase()+")";
             intent.putExtra("name", name);
             intent.putExtra("building", selectedItem.getBuilding().toUpperCase());
@@ -901,7 +982,7 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         mrn = new ListItem("building","Marion","mrn",1,3,-1, mrnLL);
         hml = new ListItem("building","Hamelin","hml",1,4,-1, hmlLL);
         crx = new ListItem("building","Learning Crossroads","crx",-1,5,-1, crxLL);
-        van = new ListItem("building","Vanier","van",1,6,-1, vanLL);
+        van = new ListItem("building","Vanier Hall","vnr",1,6,-1, vanLL);
         ftx = new ListItem("building","Fauteux","ftx",1,7,-1, ftxLL);
         dir = new ListItem("building","D'Iorio","dir",1,8,-1, dirLL);
         tbt = new ListItem("building", "Tabaret Hall", "TBT", 1, 12, -1, tbtLL);
