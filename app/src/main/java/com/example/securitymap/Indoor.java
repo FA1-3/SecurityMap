@@ -166,8 +166,18 @@ public class Indoor extends AppCompatActivity {
                     nextText.setText("Exterior");
             } else {
                 nextText.setVisibility(View.INVISIBLE);
-                next.setEnabled(false);
+                next.setEnabled(true);
+                next.setText("End");
+                next.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        MapsActivity.rating = true;
+                        finish();
+                    }
+                });
             }
+            setStart.setVisibility(View.INVISIBLE);
+            cancelStart.setVisibility(View.INVISIBLE);
 
         } else {
             pathImage.setVisibility(View.INVISIBLE);
