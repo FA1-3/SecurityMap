@@ -140,6 +140,22 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
     private EditText cmtTxt;
     private Button subBtn;
 
+    private ListItem cby;
+    private ListItem ste;
+    private ListItem stm;
+    private ListItem mrn;
+    private ListItem hml;
+    private ListItem crx;
+    private ListItem van;
+    private ListItem ftx;
+    private ListItem dir;
+    private ListItem tbt;
+    private ListItem lpr;
+    private ListItem is;
+    private ListItem hs;
+    private ListItem cp;
+
+
     /*
     private static final String SHARED_PREFS = "sharedPrefs";
     private static final String TEXT = "text";
@@ -270,6 +286,7 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
                 setStart.setVisibility(View.VISIBLE);
                 cancelStart.setVisibility(View.VISIBLE);
             }
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(defaultLocation, 15));
             rateLyt.setVisibility(View.INVISIBLE);
             constraint.setVisibility(View.INVISIBLE);
             back.setVisibility(View.INVISIBLE);
@@ -347,7 +364,7 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         back.setVisibility(View.INVISIBLE);
         nextText.setVisibility(View.INVISIBLE);
         backText.setVisibility(View.INVISIBLE);
-        buildingName.setText(intent.getStringExtra("building"));
+        buildingName.setText(intent.getStringExtra("name"));
         setStart.setEnabled(true);
         setStart.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -650,10 +667,10 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
 
         //srcSetupData();
         mode = "browse";
-        //setView();
-        startNode = 11;
+        setView();
+        /*startNode = 11;
         endNode = 5090;
-        startPath();
+        startPath();*/
     } // End of the onMapReady
 
     private void getDeviceLocation() {
@@ -740,20 +757,24 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         if(!mode.equals("path")) {
             intent.putExtra("type", "browse");
             intent.putExtra("building", "");
+            ListItem selectedItem = cby;
             if (marker.equals(cbyMarker)) {
-                intent.putExtra("building", "CBY");
-                intent.putExtra("floor", 1);
+                selectedItem = cby;
             }
 
             if (marker.equals(steMarker)) {
-                intent.putExtra("building", "STE");
-                intent.putExtra("floor", 1);
+                selectedItem = ste;
             }
 
             if (marker.equals(stmMarker)) {
-                intent.putExtra("building", "STM");
-                intent.putExtra("floor", 2);
+                selectedItem = stm;
             }
+            String name = selectedItem.getName();
+            if (!selectedItem.getName().equals("OUT"))
+                name = name+" ("+selectedItem.getBuilding().toUpperCase()+")";
+            intent.putExtra("name", name);
+            intent.putExtra("building", selectedItem.getBuilding().toUpperCase());
+            intent.putExtra("floor", selectedItem.getFloor());
             launchPreview();
         }
         return false;
@@ -788,21 +809,21 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         LatLng cpLL = new LatLng(45.421764, -75.680541);
 
         //Buildings
-        ListItem cby = new ListItem("building","Colonel By","cby",1,0,-1, cbyLL);
-        ListItem ste = new ListItem("building","SITE","ste",1,1,-1, steLL);
-        ListItem stm = new ListItem("building","STEM","stm",2,2,-1, stmLL);
-        ListItem mrn = new ListItem("building","Marion","mrn",1,3,-1, mrnLL);
-        ListItem hml = new ListItem("building","Hamelin","hml",1,4,-1, hmlLL);
-        ListItem crx = new ListItem("building","Learning Crossroads","crx",-1,5,-1, crxLL);
-        ListItem van = new ListItem("building","Vanier","van",1,6,-1, vanLL);
-        ListItem ftx = new ListItem("building","Fauteux","ftx",1,7,-1, ftxLL);
-        ListItem dir = new ListItem("building","D'Iorio","dir",1,8,-1, dirLL);
-        ListItem tbt = new ListItem("building", "Tabaret Hall", "TBT", 1, 12, -1, tbtLL);
+        cby = new ListItem("building","Colonel By","cby",1,0,-1, cbyLL);
+        ste = new ListItem("building","SITE","ste",1,1,-1, steLL);
+        stm = new ListItem("building","STEM","stm",2,2,-1, stmLL);
+        mrn = new ListItem("building","Marion","mrn",1,3,-1, mrnLL);
+        hml = new ListItem("building","Hamelin","hml",1,4,-1, hmlLL);
+        crx = new ListItem("building","Learning Crossroads","crx",-1,5,-1, crxLL);
+        van = new ListItem("building","Vanier","van",1,6,-1, vanLL);
+        ftx = new ListItem("building","Fauteux","ftx",1,7,-1, ftxLL);
+        dir = new ListItem("building","D'Iorio","dir",1,8,-1, dirLL);
+        tbt = new ListItem("building", "Tabaret Hall", "TBT", 1, 12, -1, tbtLL);
 
 
         //HAVE TO ADD THE NODE NUMBERS TO ALL THE PLACES!!!!!!!!!!!
         //Places
-        ListItem lpr = new ListItem("place", "Protection Services (LPR)", "out", 1,9, 5074, lprLL);
+        ListItem lpr = new ListItem("place", "Protection Services (LPR)", "OUT", 1,9, 5074, lprLL);
         ListItem hs = new ListItem("place", "Health Services", "OUT", 1, 10, 5076, hsLL);
         ListItem is = new ListItem("place", "Information Services", "TBT", 1,11,5090, isLL);
         ListItem cp = new ListItem("place", "Campus Pharmacy", "OUT", 1, 13, 5076, cpLL);
@@ -845,6 +866,10 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
                 ListItem selectedItem = (ListItem) (lst.getItemAtPosition(position));
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(selectedItem.getCoords(), 17));
                 intent.putExtra("type", "browse");
+                String name = selectedItem.getName();
+                if (selectedItem.getName()!="OUT")
+                    name = name+" ("+selectedItem.getBuilding().toUpperCase()+")";
+                intent.putExtra("name", name);
                 intent.putExtra("building", selectedItem.getBuilding().toUpperCase());
                 intent.putExtra("floor", selectedItem.getFloor());
                 launchPreview();
@@ -989,7 +1014,11 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
             setView();
         else if(startpath)
             startPath();
-        //else if(choosingStart)
+        else if(choosingStart){
+            setStart.setVisibility(View.VISIBLE);
+            setStart.setEnabled(false);
+            cancelStart.setVisibility(View.VISIBLE);
+        }
     }
   
 } //end of the whole thingy lol
