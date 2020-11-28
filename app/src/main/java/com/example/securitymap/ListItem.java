@@ -1,5 +1,7 @@
 package com.example.securitymap;
 
+import com.google.android.gms.maps.model.LatLng;
+
 public class ListItem {
 
     private String id;
@@ -8,17 +10,18 @@ public class ListItem {
     private int floor;
     private int num;
     private int node;
+    private LatLng coords;
 
 
-    public ListItem(String id, String name, String building, int floor, int num, int node) {
+    public ListItem(String id, String name, String building, int floor, int num, int node, LatLng coords) {
         this.id = id; //type, either building, place, or maybe eventually others
         this.name = name; // full name of building or destination
         this.building = building; //three letter indicator
         this.floor = floor; //will be -1 if not-applicable (like for a building)
         this.num = num; // every listItem will be numbered to be easily documented
         this.node = node; //will be -1 if not-applicable (like for a building)
+        this.coords= coords; //A LatLnt w/ the coords of the place/building, ** if N/A use (0,0) **
     }
-
 
     public String getId() {
         return id;
@@ -39,6 +42,8 @@ public class ListItem {
     public String getBuilding() {
         return building;
     }
+
+    public LatLng getCoords() { return coords; }
 
     public void setBuilding(String building) {
         this.building = building;
@@ -68,7 +73,7 @@ public class ListItem {
         this.floor = floor;
     }
 
-
+    public void setCoords(LatLng coords) { this.coords = coords; }
 
 } // end of the class ListItem
 

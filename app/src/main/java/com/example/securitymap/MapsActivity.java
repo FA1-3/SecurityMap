@@ -132,7 +132,7 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
     private ListView lst; //this is the VIEW ONLY that is gonna DISPLAY THE LIST
     private ArrayList<Attribute> attributes;
     public static ArrayList<ListItem> itemsList = new ArrayList<ListItem>(); //this is the actual list containing ListItems
-
+    private static final LatLng ltlgInside = new LatLng(0, 0);
 
     // Rating layout and contents
     private ConstraintLayout rateLyt;
@@ -766,17 +766,43 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         //Format of ListItem constructor
         //public ListItem(String id, String name, String building, int floor, int num, int node) {
 
-        ListItem cby = new ListItem("building","Colonel By","cby",-1,0,-1);
-        ListItem ste = new ListItem("building","SITE","ste",-1,1,-1);
-        ListItem stm = new ListItem("building","STEM","stm",-1,2,-1);
-        ListItem mrn = new ListItem("building","Marion","mrn",-1,3,-1);
-        ListItem hml = new ListItem("building","Hamelin","hml",-1,4,-1);
-        ListItem crx = new ListItem("building","Learning Crossroads","crx",-1,5,-1);
-        ListItem van = new ListItem("building","Vanier","van",-1,6,-1);
-        ListItem ftx = new ListItem("building","Fauteux","ftx",-1,7,-1);
-        ListItem dir = new ListItem("building","D'Iorio","dir",-1,8,-1);
-        ListItem lab1 = new ListItem("place","Some random place somewhere","cby",1,9,55);
-        // this last item is a TEST and should be REMOVED eventually
+        //Buildings LatLng (LL) values
+        LatLng cbyLL = new LatLng(45.419754, -75.679601);
+        LatLng steLL = new LatLng(45.419308, -75.678701);
+        LatLng stmLL = new LatLng(45.420319, -75.680508);
+        LatLng mrnLL = new LatLng(45.42052646805507, -75.681055736891);
+        LatLng hmlLL = new LatLng(45.42387081051715, -75.68587101939168);
+        LatLng crxLL = new LatLng(45.42202898302483, -75.68181090791289);
+        LatLng vanLL = new LatLng(45.42148723256023, -75.68340224794174);
+        LatLng ftxLL = new LatLng(45.42374905438684, -75.6825786648393);
+        LatLng dirLL = new LatLng(45.42095375422315, -75.68130497413767);
+        LatLng tbtLL = new LatLng(45.424540235601334, -75.68633147106046);
+
+        //Places LatLng (LL) values
+        LatLng lprLL = new LatLng(45.421250, -75.680353);
+        LatLng hsLL = new LatLng(45.421755, -75.679601);
+        LatLng isLL = new LatLng(45.424537, -75.686460);
+        LatLng cpLL = new LatLng(45.421764, -75.680541);
+
+        //Buildings
+        ListItem cby = new ListItem("building","Colonel By","cby",-1,0,-1, cbyLL);
+        ListItem ste = new ListItem("building","SITE","ste",-1,1,-1, steLL);
+        ListItem stm = new ListItem("building","STEM","stm",-1,2,-1, stmLL);
+        ListItem mrn = new ListItem("building","Marion","mrn",-1,3,-1, mrnLL);
+        ListItem hml = new ListItem("building","Hamelin","hml",-1,4,-1, hmlLL);
+        ListItem crx = new ListItem("building","Learning Crossroads","crx",-1,5,-1, crxLL);
+        ListItem van = new ListItem("building","Vanier","van",-1,6,-1, vanLL);
+        ListItem ftx = new ListItem("building","Fauteux","ftx",-1,7,-1, ftxLL);
+        ListItem dir = new ListItem("building","D'Iorio","dir",-1,8,-1, dirLL);
+        ListItem tbt = new ListItem("building", "Tabaret Hall", "TBT", -1, 12, -1, tbtLL);
+
+
+        //HAVE TO ADD THE NODE NUMBERS TO ALL THE PLACES!!!!!!!!!!!
+        //Places
+        ListItem lpr = new ListItem("place", "Protection Services (LPR)", "out", -1,9, 5074, lprLL);
+        ListItem hs = new ListItem("place", "Health Services", "OUT", -1, 10, 5076, hsLL);
+        ListItem is = new ListItem("place", "Information Services", "TBT", 1,11,5090, isLL);
+        ListItem cp = new ListItem("place", "Campus Pharmacy", "OUT", -1, 13, 5076, cpLL);
 
         itemsList.add(cby);
         itemsList.add(ste);
@@ -787,8 +813,12 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         itemsList.add(van);
         itemsList.add(ftx);
         itemsList.add(dir);
-        itemsList.add(lab1);
-        // remove this last TEST ITEM eventually :)
+        itemsList.add(tbt);
+
+        itemsList.add(lpr);
+        itemsList.add(hs);
+        itemsList.add(is);
+        itemsList.add(cp);
 
     }
 
@@ -808,10 +838,11 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
+                // fills this ListItem object with the one that was clicked
                 ListItem selectedItem = (ListItem) (lst.getItemAtPosition(position));
 
                 // This is useless and I need to add in a feature for that
-                Intent itemWasClicked = new Intent(getApplicationContext(),MapsActivity.class);
+                Intent itemWasClicked = new Intent(getApplicationContext(), MapsActivity.class);
 
             }
         });
@@ -833,7 +864,8 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
                 ArrayList<ListItem> filteredItems = new ArrayList<ListItem>();
 
                 for (ListItem listItem: itemsList){ //goes through the entire initial list
-                    if (listItem.getName().toLowerCase().contains(newText.toLowerCase())){
+                    if ((listItem.getName().toLowerCase().contains(newText.toLowerCase()))
+                            || (listItem.getBuilding().toLowerCase().contains(newText.toLowerCase()))){
                         filteredItems.add(listItem);
                         // if the searched text is exactly present in the name of the list item,
                         // then make it part of the filtered list of items
