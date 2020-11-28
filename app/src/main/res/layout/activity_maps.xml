@@ -337,7 +337,8 @@
             android:scaleType="centerCrop"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/back_button_img" />
+            app:srcCompat="@drawable/back_button_img"
+            android:contentDescription="TODO" />
 
         <SearchView
             android:id="@+id/searchBar"
@@ -353,7 +354,7 @@
             android:id="@+id/bldgCheckBox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Edifices"
+            android:text="Buildings"
             android:translationX="75dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/searchBar" />
@@ -362,7 +363,7 @@
             android:id="@+id/placeCheckBox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Endroits"
+            android:text="Places"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/bldgCheckBox"
             app:layout_constraintTop_toBottomOf="@+id/searchBar" />

@@ -703,6 +703,7 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         stmMarker = mMap.addMarker(new MarkerOptions().position(stm).title("STEM (STM)").icon(smallMarkerIcon));
         mrnMarker = mMap.addMarker(new MarkerOptions().position(mrn).title("Marion Hall (MRN)").icon(smallMarkerIcon));
         crxMarker = mMap.addMarker(new MarkerOptions().position(crx).title("Learning Crossroads (CRX)").icon(smallMarkerIcon));
+        hmlMarker = mMap.addMarker(new MarkerOptions().position(hml).title("Hamelin Hall (HML)").icon(smallMarkerIcon));
         ftxMarker = mMap.addMarker(new MarkerOptions().position(ftx).title("Fauteux Hall (FTX)").icon(smallMarkerIcon));
         vanMarker = mMap.addMarker(new MarkerOptions().position(van).title("Vanier Hall (VNR)").icon(smallMarkerIcon));
         dirMarker = mMap.addMarker(new MarkerOptions().position(dir).title("D'Iorio Hall (DRO)").icon(smallMarkerIcon));
@@ -977,7 +978,7 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
 
         //Places LatLng (LL) values
         LatLng lprLL = new LatLng(45.421250, -75.680353);
-        LatLng hsLL = new LatLng(45.421755, -75.679601);
+        LatLng hsLL = new LatLng(45.421755, -75.680357);
         LatLng isLL = new LatLng(45.424537, -75.686460);
         LatLng cpLL = new LatLng(45.421764, -75.680541);
 
