@@ -27,7 +27,7 @@
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="0dp"
         android:background="#E6FFFFFF"
-        android:visibility="visible">
+        android:visibility="gone">
 
         <TextView
             android:id="@+id/textView19"
@@ -166,6 +166,15 @@
         android:text="Back"
         android:translationX="-70dp"
         android:translationY="-30dp" />
+
+    <Button
+        android:id="@+id/button17"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:text="Directions"
+        android:translationY="-15dp" />
 
     <TextView
         android:id="@+id/textView11"
