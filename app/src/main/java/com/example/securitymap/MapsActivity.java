@@ -360,6 +360,11 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         return y;
     }
     public void launchPreview(){
+        if(dropPin.getText().equals("Remove Pin")) {
+            pin.performClick();
+        }
+        pin.setEnabled(false);
+
         constraint.setVisibility(View.VISIBLE);
         cancel.setVisibility(View.INVISIBLE);
         clickMessage.setVisibility(View.INVISIBLE);
@@ -779,6 +784,7 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
             @Override
             public void onClick(View v) {
                 constraint.setVisibility(View.INVISIBLE);
+                pin.setEnabled(true);
             }
         });
         getLocationPermission();
