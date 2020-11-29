@@ -55,7 +55,8 @@ public class Dijkstra {
             Node evaluation = nodes.get(eval);
             for (int i=0; i<evaluation.neighbour.size(); i++) {  //on passe au travers de tous les voisins du point considéré
                 Node neighbour = nodes.get(evaluation.neighbour.get(i));
-                if (neighbour.att[0] != Attribute.BUILDING && neighbour.att[1] != Attribute.BUILDING) {
+                if((!att.contains(evaluation.att[0])&&!att.contains(evaluation.att[1]))||(!att.contains(neighbour.att[0])&&!att.contains(neighbour.att[1])))
+                if (neighbour.att[0] != Attribute.BUILDING && neighbour.att[1] != Attribute.BUILDING || neighbour.n==end) {
                     if ((!settled.contains(evaluation.neighbour.get(i))) &&  //si point n'a pas été déjà visité
                             (evaluation.d + evaluation.distance.get(i) < neighbour.d) && //si distance (d) du voisin est plus grande
                             //que la distance du point évalué + la distance entre ce point et le voisin
@@ -78,7 +79,7 @@ public class Dijkstra {
         for(int i=1; i<=nodes.get(end).rank; i++){ //pour déterminer le trajet, en commenceant avec le point d'arrivé, prendre le dernier point qui donne le trajet le plus court
                                                     //au point
             path.add(nodes.get(path.get(i-1)).last);
-            Log.d("pathOut", path.get(i)+"");
+            Log.d("wtaf", path.get(i)+"");
         }
         path = reverse(path);
 

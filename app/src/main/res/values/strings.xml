@@ -17,7 +17,7 @@
     <string name="soumettre">Soumettre</string>
     <string name="commentaires">Commentaires</string>
     <string name="hint">hint</string>
-    <string name="valuez_votre_trajet">Évaluez votre trajet</string>
+    <string name="Évaluez_votre_trajet">Évaluez votre trajet</string>
     <string name="site">SITE</string>
     <string name="location_permission_denied">Location Permission Denied</string>
     <string name="permission_required_toast">Permission Required Toast</string>

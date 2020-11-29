@@ -54,6 +54,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.List;
 
 import static java.lang.Math.PI;
 import static java.lang.Math.cos;
@@ -183,10 +184,17 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         }
         return n;
     }
+
+
+
     public void setView() {
         if (mode.equals("path")) {
             constraint.setVisibility(View.INVISIBLE);
             rateLyt.setVisibility(View.INVISIBLE);
+            dropPin.setVisibility(View.INVISIBLE);
+            setStart.setVisibility(View.INVISIBLE);
+            cancelStart.setVisibility(View.INVISIBLE);
+            pin.setVisibility(View.INVISIBLE);
 
             pathProgress = Dijkstra.pathProgress;
             int counter = 0;
@@ -195,6 +203,12 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
                     counter++;
                 }
             }
+            Log.d("idfk", counter+"");
+            Polyline poly = polyline.get(counter-1);
+            List<LatLng> e = poly.getPoints();
+            LatLng lat = e.get(0);
+
+            Log.d("idfk", polyline.get(counter-1).getPoints().get(0)+"");
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(polyline.get(counter-1).getPoints().get(0), 20));
             if (pathProgress != 0) {
                 backBuilding = Dijkstra.pathBuildings.get(pathProgress - 1);
@@ -309,16 +323,20 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
 
     public void startPath(){
         mode = "path";
+        Log.d("wtaf", "1");
         Dijkstra.calculatePath(nodesList, startNode, endNode, attributes);
         path = Dijkstra.path;
         Dijkstra.pathProgress = 0;
+        pinDirections.setVisibility(View.INVISIBLE);
         next.setVisibility(View.VISIBLE);
         nextText.setVisibility(View.VISIBLE);
         back.setVisibility(View.VISIBLE);
         backText.setVisibility(View.VISIBLE);
         polyline = new ArrayList<>();
         PolylineOptions polylineOptions = new PolylineOptions();
+        Log.d("wtaf", path.size()+"");
         for (int i=0; i<path.size(); i++) {
+            Log.d("wtaf", "2");
             if(i<path.size()-1&&(nodesList.get(path.get(i)).building==Build.OUT&&nodesList.get(path.get(i+1)).building==Build.OUT)){
                 if(i == 0 || nodesList.get(path.get(i - 1)).building != Build.OUT) {
                     polylineOptions = new PolylineOptions();
@@ -331,13 +349,13 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
                 polylineOptions.add(new LatLng((Math.toDegrees(nodesList.get(path.get(i+1)).y/EARTH_RADIUS))+origin.latitude, (Math.toDegrees(nodesList.get(path.get(i+1)).x)/(EARTH_RADIUS*Math.cos(Math.toRadians(origin.latitude))))+origin.longitude));
             } else if(i>1&&nodesList.get(path.get(i)).building==Build.OUT&&nodesList.get(path.get(i-1)).building==Build.OUT){
                 polyline.add(mMap.addPolyline(polylineOptions));
-                Log.d("outside", i+"toutee");
+                Log.d("wtaf", "3");
             }
             if(i==path.size()-1&&i>1&&nodesList.get(path.get(i)).building==Build.OUT){
                 if(nodesList.get(path.get(i-1)).building!=Build.OUT)
                     polylineOptions.add(new LatLng((Math.toDegrees(nodesList.get(path.get(i)).y/EARTH_RADIUS))+origin.latitude, (Math.toDegrees(nodesList.get(path.get(i)).x)/(EARTH_RADIUS*Math.cos(Math.toRadians(origin.latitude))))+origin.longitude));
                 polyline.add(mMap.addPolyline(polylineOptions));
-                Log.d("outside", i + "touteee");
+                Log.d("wtaf", "4");
             }
         }
         if (nodesList.get(path.get(0)).building != Build.OUT) {
@@ -392,7 +410,12 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
             setStart.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    startNode = buildings.get(Build.valueOf(intent.getStringExtra("building"))).center;
+                    int node1 = intent.getIntExtra("node", -1);
+                    if(node1==-1)
+                        startNode = buildings.get(Build.valueOf(intent.getStringExtra("building"))).center;
+                    else
+                        startNode = node1;
+                    Log.d("annow", startNode+" "+endNode);
                     startPath();
                 }
             });
@@ -403,7 +426,11 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
             public void onClick(View v) {
                 setStart.setVisibility(View.INVISIBLE);
                 cancelStart.setVisibility(View.INVISIBLE);
-                endNode = buildings.get(Build.valueOf(intent.getStringExtra("building"))).center;
+                int node1 = intent.getIntExtra("node", -1);
+                if(node1==-1)
+                    endNode = buildings.get(Build.valueOf(intent.getStringExtra("building"))).center;
+                else
+                    endNode = node1;
                 clickMessage.setVisibility(View.VISIBLE);
                 cancel.setVisibility(View.VISIBLE);
                 startMap.setVisibility(View.VISIBLE);
@@ -450,6 +477,7 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
             @Override
             public void onClick(View v) {
                 choosingStart=true;
+                pin.setEnabled(true);
                 constraint.setVisibility(View.INVISIBLE);
                 setStart.setVisibility(View.VISIBLE);
                 setStart.setEnabled(false);
@@ -491,6 +519,7 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         // IMPORTANT NEED TO REMOVE EVENTUALLY
         boo = false;
         rating=false;
+        mode = "browse";
         attributes = new ArrayList<>();
     }
     //first set of markers
@@ -588,7 +617,6 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
                         setStart.setVisibility(View.VISIBLE);
                         setStart.setEnabled(true);
                         cancelStart.setVisibility(View.VISIBLE);
-                        startNode = getClosestNode(pinMarker.getPosition());
                     }
                     pinMarker = mMap.addMarker(
                             new MarkerOptions()
@@ -795,7 +823,6 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(defaultLocation, DEFAULT_ZOOM));
 
         //srcSetupData();
-        mode = "browse";
         setView();
         /*startNode = 11;
         endNode = 5090;
@@ -949,6 +976,7 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
             intent.putExtra("name", name);
             intent.putExtra("building", selectedItem.getBuilding().toUpperCase());
             intent.putExtra("floor", selectedItem.getFloor());
+            intent.putExtra("node", selectedItem.getNode());
             launchPreview();
         }
         return false;
@@ -1046,6 +1074,7 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
                 intent.putExtra("name", name);
                 intent.putExtra("building", selectedItem.getBuilding().toUpperCase());
                 intent.putExtra("floor", selectedItem.getFloor());
+                intent.putExtra("node", selectedItem.getNode());
                 launchPreview();
 
             }
@@ -1125,6 +1154,9 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
     public void launchRating(){
         // Comment and rating menu stuff
         rateLyt.setVisibility(View.VISIBLE);
+        setStart.setVisibility(View.INVISIBLE);
+        cancelStart.setVisibility(View.INVISIBLE);
+        constraint.setVisibility(View.INVISIBLE);
         // what happens when the user clicks the SUBMIT button after giving feedback
         subBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -1138,7 +1170,7 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
                 boo = false;
                 choosingStart = false;
                 startpath = false;
-
+                pin.setEnabled(true);
                 //Log.d("ratingTest",""+numStr);
                 cmt = cmtTxt.getText().toString();
                 //Log.d("ratingTest",cmt);
@@ -1184,6 +1216,14 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
     @Override
     protected void onResume() {
         super.onResume();
+        if(mode.equals("exit")){
+            mode = "browse";
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(defaultLocation, 15));
+            boo = false;
+            choosingStart = false;
+            startpath = false;
+            setView();
+        } else
         if(rating){
             launchRating();
         }
