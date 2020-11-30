@@ -8,6 +8,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.util.Log;
@@ -91,7 +92,31 @@ public class Indoor extends AppCompatActivity {
                 if (nodes.get(path.get(k)).building == building.name && nodes.get(path.get(k)).building == nodes.get(path.get(k + 1)).building) {
                     if (nodes.get(path.get(k)).floor == nodes.get(path.get(k + 1)).floor && nodes.get(path.get(k)).floor == i) {
                         tempCanvas.drawLine((int) (ratio * (nodes.get(path.get(k)).x + tempFloor.ox)), (int) (ratio * (tempFloor.height - nodes.get(path.get(k)).y - tempFloor.oy)), (int) (ratio * (nodes.get(path.get(k + 1)).x + tempFloor.ox)), (int) (ratio * (tempFloor.height - nodes.get(path.get(k + 1)).y - tempFloor.oy)), myPaint);
-                        Log.d("taggg", nodes.get(path.get(k)).building+", "+nodes.get(path.get(k)).floor);
+                        if(k==0)
+                            tempCanvas.drawBitmap(MapsActivity.startMarkerBitmap, new Rect(0,0, 201, 201), new Rect((int)(ratio * (nodes.get(path.get(k)).x + tempFloor.ox))-58, (int) (ratio * (tempFloor.height - nodes.get(path.get(k)).y - tempFloor.oy))-116, (int)(ratio * (nodes.get(path.get(k)).x + tempFloor.ox))+58, (int) (ratio * (tempFloor.height - nodes.get(path.get(k)).y - tempFloor.oy))), null);
+                        if(k==path.size() - 2)
+                            tempCanvas.drawBitmap(MapsActivity.endMarkerBitmap, new Rect(0,0, 201, 201), new Rect((int)(ratio * (nodes.get(path.get(k+1)).x + tempFloor.ox))-58, (int) (ratio * (tempFloor.height - nodes.get(path.get(k+1)).y - tempFloor.oy))-116, (int)(ratio * (nodes.get(path.get(k+1)).x + tempFloor.ox))+58, (int) (ratio * (tempFloor.height - nodes.get(path.get(k+1)).y - tempFloor.oy))), null);
+                        if(k<path.size() - 2 && (nodes.get(path.get(k)).building != nodes.get(path.get(k + 2)).building||nodes.get(path.get(k + 2)).floor!=i)){
+                            tempCanvas.save();
+                            float x = (float)(ratio * (nodes.get(path.get(k + 1)).x + tempFloor.ox));
+                            float y = (float) (ratio * (tempFloor.height - nodes.get(path.get(k + 1)).y - tempFloor.oy));
+                            double anglee = Math.atan2((tempFloor.height - nodes.get(path.get(k + 1)).y - tempFloor.oy)-(tempFloor.height - nodes.get(path.get(k)).y - tempFloor.oy), (nodes.get(path.get(k + 1)).x + tempFloor.ox)-(nodes.get(path.get(k)).x + tempFloor.ox));
+                            tempCanvas.rotate((float)(Math.toDegrees(anglee)-270.0), x, y);
+                            double height = 70;
+                            tempCanvas.drawBitmap(MapsActivity.arrow, new Rect(0,0,201,201), new Rect((int)(x-(height/2)), (int)(y-(height/2)), (int)(x+(height/2)), (int)(y+(height/2))), null);
+                            tempCanvas.restore();
+                        }
+                        if(k>0 && (nodes.get(path.get(k)).building != nodes.get(path.get(k - 1)).building||nodes.get(path.get(k - 1)).floor!=i)){
+                            tempCanvas.save();
+                            float x = (float)(ratio * (nodes.get(path.get(k)).x + tempFloor.ox));
+                            float y = (float) (ratio * (tempFloor.height - nodes.get(path.get(k)).y - tempFloor.oy));
+                            double angles = Math.atan2((tempFloor.height - nodes.get(path.get(k + 1)).y - tempFloor.oy)-(tempFloor.height - nodes.get(path.get(k)).y - tempFloor.oy), (nodes.get(path.get(k + 1)).x + tempFloor.ox)-(nodes.get(path.get(k)).x + tempFloor.ox));
+                            tempCanvas.rotate((float)(Math.toDegrees(angles)-270.0), x, y);
+                            double height = 70;
+                            tempCanvas.drawBitmap(MapsActivity.arrow, new Rect(0,0,201,201), new Rect((int)(x-(height/2)), (int)(y-(height/2)), (int)(x+(height/2)), (int)(y+(height/2))), null);
+                            tempCanvas.restore();
+                        }
+
                     }
                 }
             }

@@ -8,11 +8,13 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
@@ -40,21 +42,27 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CustomCap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.RoundCap;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.logging.Logger;
 
 import static java.lang.Math.PI;
 import static java.lang.Math.cos;
@@ -106,6 +114,13 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
     static String mode;
     private Marker pinMarker;
     private Button pinDirections;
+    private Marker startMarker;
+    private BitmapDescriptor startIcon;
+    private Marker endMarker;
+    private BitmapDescriptor endIcon;
+    static Bitmap startMarkerBitmap;
+    static Bitmap endMarkerBitmap;
+    static Bitmap arrow;
 
     private ImageButton searchBtn; //this is the button to pop open the search and list window
 
@@ -162,7 +177,6 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
     public Hashtable<Build, Building> buildings;
 
     private LatLngBounds UOTTAWA = new LatLngBounds(new LatLng(45.418436, -75.689445), new LatLng(45.425490, -75.675062));
-
 
     public int getClosestNode(LatLng pos){
         int n=0;
@@ -317,12 +331,21 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
                     poly.remove();
                 }
             }
+            if(nodesList.get(startNode).building==Build.OUT){
+                startMarker.remove();
+            }
+            if(nodesList.get(endNode).building==Build.OUT){
+                endMarker.remove();
+            }
         }
 
     }
 
     public void startPath(){
         mode = "path";
+        if(dropPin.getText().equals("Remove Pin")){
+            pinMarker.remove();
+        }
         Log.d("wtaf", "1");
         Dijkstra.calculatePath(nodesList, startNode, endNode, attributes);
         path = Dijkstra.path;
@@ -342,18 +365,26 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
                     polylineOptions = new PolylineOptions();
                     polylineOptions.color(Color.RED);
                     polylineOptions.width(20);
+                    polylineOptions.startCap((new RoundCap()));
+                    polylineOptions.endCap((new RoundCap()));
                     Log.d("outside", i+"tout");
                     polylineOptions.add(new LatLng((Math.toDegrees(nodesList.get(path.get(i)).y/EARTH_RADIUS))+origin.latitude, (Math.toDegrees(nodesList.get(path.get(i)).x)/(EARTH_RADIUS*Math.cos(Math.toRadians(origin.latitude))))+origin.longitude));
+                    if(i==0)
+                        startMarker = mMap.addMarker(new MarkerOptions().position(new LatLng(Math.toDegrees(nodesList.get(startNode).y/EARTH_RADIUS)+origin.latitude, Math.toDegrees(nodesList.get(startNode).x/(Math.cos(Math.toRadians(origin.latitude))*EARTH_RADIUS))+origin.longitude)).icon(startIcon));
+                    else
+                        polylineOptions.startCap(new CustomCap(BitmapDescriptorFactory.fromResource(R.drawable.arrowstart), 1000));
                 }
                 Log.d("outside", i+"toute");
                 polylineOptions.add(new LatLng((Math.toDegrees(nodesList.get(path.get(i+1)).y/EARTH_RADIUS))+origin.latitude, (Math.toDegrees(nodesList.get(path.get(i+1)).x)/(EARTH_RADIUS*Math.cos(Math.toRadians(origin.latitude))))+origin.longitude));
-            } else if(i>1&&nodesList.get(path.get(i)).building==Build.OUT&&nodesList.get(path.get(i-1)).building==Build.OUT){
+            } else if(i!=path.size()-1&&i>1&&nodesList.get(path.get(i)).building==Build.OUT&&nodesList.get(path.get(i-1)).building==Build.OUT){
+                polylineOptions.endCap(new CustomCap(BitmapDescriptorFactory.fromResource(R.drawable.arrow), 1000));
                 polyline.add(mMap.addPolyline(polylineOptions));
                 Log.d("wtaf", "3");
             }
             if(i==path.size()-1&&i>1&&nodesList.get(path.get(i)).building==Build.OUT){
                 if(nodesList.get(path.get(i-1)).building!=Build.OUT)
                     polylineOptions.add(new LatLng((Math.toDegrees(nodesList.get(path.get(i)).y/EARTH_RADIUS))+origin.latitude, (Math.toDegrees(nodesList.get(path.get(i)).x)/(EARTH_RADIUS*Math.cos(Math.toRadians(origin.latitude))))+origin.longitude));
+                endMarker = mMap.addMarker(new MarkerOptions().position(new LatLng(Math.toDegrees(nodesList.get(endNode).y/EARTH_RADIUS)+origin.latitude, Math.toDegrees(nodesList.get(endNode).x/(Math.cos(Math.toRadians(origin.latitude))*EARTH_RADIUS))+origin.longitude)).icon(endIcon));
                 polyline.add(mMap.addPolyline(polylineOptions));
                 Log.d("wtaf", "4");
             }
@@ -521,6 +552,8 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         rating=false;
         mode = "browse";
         attributes = new ArrayList<>();
+
+
     }
     //first set of markers
     private Marker cbyMarker;
@@ -693,6 +726,17 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         });
 
         origin = new LatLng(45.419513, -75.678796);
+
+        Bitmap a = BitmapFactory.decodeResource(getResources(), R.drawable.endmarkericon);
+        startMarkerBitmap = Bitmap.createScaledBitmap(a, 201, 201, false);
+        startIcon = BitmapDescriptorFactory.fromBitmap(startMarkerBitmap);
+
+        Bitmap q = BitmapFactory.decodeResource(getResources(), R.drawable.end_marker_1);
+        endMarkerBitmap = Bitmap.createScaledBitmap(q, 137, 201, false);
+        endIcon = BitmapDescriptorFactory.fromBitmap(endMarkerBitmap);
+
+        Bitmap z = BitmapFactory.decodeResource(getResources(), R.drawable.arrow);
+        arrow = Bitmap.createScaledBitmap(z, 201, 201, false);
 
         Bitmap b = BitmapFactory.decodeResource(getResources(), R.drawable.building_icon_2);
         Bitmap smallMarker = Bitmap.createScaledBitmap(b, 103, 150, false);
@@ -1225,6 +1269,8 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
             setView();
         } else
         if(rating){
+            mode = "path";
+            setView();
             launchRating();
         }
         else if(boo)
