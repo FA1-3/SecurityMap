@@ -3,14 +3,13 @@ package com.example.securitymap;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
@@ -70,7 +69,6 @@ public class Indoor extends AppCompatActivity {
     private Button startLocation;
 
     public void createBitmaps(){
-//        Log.d("taggg", "beginning gay loop "+building.name);
         Paint myPaint = new Paint();
         myPaint.setColor(Color.RED);
         myPaint.setAntiAlias(true);
@@ -91,7 +89,31 @@ public class Indoor extends AppCompatActivity {
                 if (nodes.get(path.get(k)).building == building.name && nodes.get(path.get(k)).building == nodes.get(path.get(k + 1)).building) {
                     if (nodes.get(path.get(k)).floor == nodes.get(path.get(k + 1)).floor && nodes.get(path.get(k)).floor == i) {
                         tempCanvas.drawLine((int) (ratio * (nodes.get(path.get(k)).x + tempFloor.ox)), (int) (ratio * (tempFloor.height - nodes.get(path.get(k)).y - tempFloor.oy)), (int) (ratio * (nodes.get(path.get(k + 1)).x + tempFloor.ox)), (int) (ratio * (tempFloor.height - nodes.get(path.get(k + 1)).y - tempFloor.oy)), myPaint);
-                        Log.d("taggg", nodes.get(path.get(k)).building+", "+nodes.get(path.get(k)).floor);
+                        if(k==0)
+                            tempCanvas.drawBitmap(MapsActivity.startMarkerBitmap, new Rect(0,0, 201, 201), new Rect((int)(ratio * (nodes.get(path.get(k)).x + tempFloor.ox))-58, (int) (ratio * (tempFloor.height - nodes.get(path.get(k)).y - tempFloor.oy))-116, (int)(ratio * (nodes.get(path.get(k)).x + tempFloor.ox))+58, (int) (ratio * (tempFloor.height - nodes.get(path.get(k)).y - tempFloor.oy))), null);
+                        if(k==path.size() - 2)
+                            tempCanvas.drawBitmap(MapsActivity.endMarkerBitmap, new Rect(0,0, 201, 201), new Rect((int)(ratio * (nodes.get(path.get(k+1)).x + tempFloor.ox))-58, (int) (ratio * (tempFloor.height - nodes.get(path.get(k+1)).y - tempFloor.oy))-116, (int)(ratio * (nodes.get(path.get(k+1)).x + tempFloor.ox))+58, (int) (ratio * (tempFloor.height - nodes.get(path.get(k+1)).y - tempFloor.oy))), null);
+                        if(k<path.size() - 2 && (nodes.get(path.get(k)).building != nodes.get(path.get(k + 2)).building||nodes.get(path.get(k + 2)).floor!=i)){
+                            tempCanvas.save();
+                            float x = (float)(ratio * (nodes.get(path.get(k + 1)).x + tempFloor.ox));
+                            float y = (float) (ratio * (tempFloor.height - nodes.get(path.get(k + 1)).y - tempFloor.oy));
+                            double anglee = Math.atan2((tempFloor.height - nodes.get(path.get(k + 1)).y - tempFloor.oy)-(tempFloor.height - nodes.get(path.get(k)).y - tempFloor.oy), (nodes.get(path.get(k + 1)).x + tempFloor.ox)-(nodes.get(path.get(k)).x + tempFloor.ox));
+                            tempCanvas.rotate((float)(Math.toDegrees(anglee)-270.0), x, y);
+                            double height = 70;
+                            tempCanvas.drawBitmap(MapsActivity.arrow, new Rect(0,0,201,201), new Rect((int)(x-(height/2)), (int)(y-(height/2)), (int)(x+(height/2)), (int)(y+(height/2))), null);
+                            tempCanvas.restore();
+                        }
+                        if(k>0 && (nodes.get(path.get(k)).building != nodes.get(path.get(k - 1)).building||nodes.get(path.get(k - 1)).floor!=i)){
+                            tempCanvas.save();
+                            float x = (float)(ratio * (nodes.get(path.get(k)).x + tempFloor.ox));
+                            float y = (float) (ratio * (tempFloor.height - nodes.get(path.get(k)).y - tempFloor.oy));
+                            double angles = Math.atan2((tempFloor.height - nodes.get(path.get(k + 1)).y - tempFloor.oy)-(tempFloor.height - nodes.get(path.get(k)).y - tempFloor.oy), (nodes.get(path.get(k + 1)).x + tempFloor.ox)-(nodes.get(path.get(k)).x + tempFloor.ox));
+                            tempCanvas.rotate((float)(Math.toDegrees(angles)-270.0), x, y);
+                            double height = 70;
+                            tempCanvas.drawBitmap(MapsActivity.arrow, new Rect(0,0,201,201), new Rect((int)(x-(height/2)), (int)(y-(height/2)), (int)(x+(height/2)), (int)(y+(height/2))), null);
+                            tempCanvas.restore();
+                        }
+
                     }
                 }
             }
@@ -228,26 +250,26 @@ public class Indoor extends AppCompatActivity {
         type = getIntent().getStringExtra("type");
 
         mScaleDetector = new ScaleGestureDetector(this, new Indoor.ScaleListener());
-        floorPlan = (ImageView)findViewById(R.id.imageView2);
-        pathImage = (ImageView)findViewById(R.id.imageView);
+        floorPlan = findViewById(R.id.imageView2);
+        pathImage = findViewById(R.id.imageView);
         buildings = CSVFile.getBuildings();
         nodes = CSVFile.getNodes();
         building = buildings.get(Build.valueOf(build));
-        floorBar = (SeekBar)findViewById(R.id.seekBar2);
-        floorText = (TextView)findViewById(R.id.textView4);
-        buildingText = (TextView)findViewById(R.id.textView2);
-        back = (Button)findViewById(R.id.button3);
-        backText = (TextView)findViewById(R.id.textView3);
-        next = (Button)findViewById(R.id.button);
-        nextText = (TextView)findViewById(R.id.textView);
-        directions = (Button)findViewById(R.id.button7);
+        floorBar = findViewById(R.id.seekBar2);
+        floorText = findViewById(R.id.textView4);
+        buildingText = findViewById(R.id.textView2);
+        back = findViewById(R.id.button3);
+        backText = findViewById(R.id.textView3);
+        next = findViewById(R.id.button);
+        nextText = findViewById(R.id.textView);
+        directions = findViewById(R.id.button7);
         directions.setEnabled(false);
-        pin = (ImageView)findViewById(R.id.imageView4);
+        pin = findViewById(R.id.imageView4);
         pin.setVisibility(View.INVISIBLE);
-        pinBtn = (ImageButton)findViewById(R.id.imageButton7);
-        dropPin = (TextView) findViewById(R.id.textView7);
+        pinBtn = findViewById(R.id.imageButton7);
+        dropPin = findViewById(R.id.textView7);
         dropPin.setText("Drop Pin");
-        constraint = (ConstraintLayout) findViewById(R.id.constraint1);
+        constraint = findViewById(R.id.constraint1);
         constraint.setVisibility(View.INVISIBLE);
         setStart = findViewById(R.id.button4);
         setStart.setVisibility(View.INVISIBLE);
@@ -268,8 +290,6 @@ public class Indoor extends AppCompatActivity {
 
         mPosX = (float) 6969696969.0;
         mPosY = (float) 6969696969.0;
-        //Canvas canvas = ne
-        //floorBitmaps[1]
 
         floorBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -380,7 +400,6 @@ public class Indoor extends AppCompatActivity {
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
             mScaleFactor *= detector.getScaleFactor();
-            Log.d("scale", String.valueOf(mScaleFactor));
 
             // Don't let the object get too small or too large.
             mScaleFactor = Math.max(1.0f, Math.min(mScaleFactor, 5.0f));
