@@ -8,13 +8,11 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
@@ -54,15 +52,11 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.logging.Logger;
 
 import static java.lang.Math.PI;
 import static java.lang.Math.cos;
@@ -157,13 +151,6 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
     private ListItem cp;
 
 
-    /*
-    private static final String SHARED_PREFS = "sharedPrefs";
-    private static final String TEXT = "text";
-    private SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
-    private SharedPreferences.Editor editor = sharedPreferences.edit();
-    */
-
     private static final double EARTH_RADIUS = 6378100;
     private LatLng origin;
 
@@ -217,12 +204,7 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
                     counter++;
                 }
             }
-            Log.d("idfk", counter+"");
-            Polyline poly = polyline.get(counter-1);
-            List<LatLng> e = poly.getPoints();
-            LatLng lat = e.get(0);
 
-            Log.d("idfk", polyline.get(counter-1).getPoints().get(0)+"");
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(polyline.get(counter-1).getPoints().get(0), 20));
             if (pathProgress != 0) {
                 backBuilding = Dijkstra.pathBuildings.get(pathProgress - 1);
@@ -300,9 +282,7 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
                         } else {
                             intent.putExtra("type", "path");
                             intent.putExtra("building", String.valueOf(nextBuilding));
-                            Log.d("outside", String.valueOf(nextBuilding));
                             intent.putExtra("floor", nextFloor);
-                            Log.d("outside", String.valueOf(nextFloor));
                             startActivity(intent);
                         }
                     } else {
@@ -346,7 +326,6 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         if(dropPin.getText().equals("Remove Pin")){
             pinMarker.remove();
         }
-        Log.d("wtaf", "1");
         Dijkstra.calculatePath(nodesList, startNode, endNode, attributes);
         path = Dijkstra.path;
         Dijkstra.pathProgress = 0;
@@ -357,9 +336,7 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         backText.setVisibility(View.VISIBLE);
         polyline = new ArrayList<>();
         PolylineOptions polylineOptions = new PolylineOptions();
-        Log.d("wtaf", path.size()+"");
         for (int i=0; i<path.size(); i++) {
-            Log.d("wtaf", "2");
             if(i<path.size()-1&&(nodesList.get(path.get(i)).building==Build.OUT&&nodesList.get(path.get(i+1)).building==Build.OUT)){
                 if(i == 0 || nodesList.get(path.get(i - 1)).building != Build.OUT) {
                     polylineOptions = new PolylineOptions();
@@ -367,26 +344,22 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
                     polylineOptions.width(20);
                     polylineOptions.startCap((new RoundCap()));
                     polylineOptions.endCap((new RoundCap()));
-                    Log.d("outside", i+"tout");
                     polylineOptions.add(new LatLng((Math.toDegrees(nodesList.get(path.get(i)).y/EARTH_RADIUS))+origin.latitude, (Math.toDegrees(nodesList.get(path.get(i)).x)/(EARTH_RADIUS*Math.cos(Math.toRadians(origin.latitude))))+origin.longitude));
                     if(i==0)
                         startMarker = mMap.addMarker(new MarkerOptions().position(new LatLng(Math.toDegrees(nodesList.get(startNode).y/EARTH_RADIUS)+origin.latitude, Math.toDegrees(nodesList.get(startNode).x/(Math.cos(Math.toRadians(origin.latitude))*EARTH_RADIUS))+origin.longitude)).icon(startIcon));
                     else
                         polylineOptions.startCap(new CustomCap(BitmapDescriptorFactory.fromResource(R.drawable.arrowstart), 1000));
                 }
-                Log.d("outside", i+"toute");
                 polylineOptions.add(new LatLng((Math.toDegrees(nodesList.get(path.get(i+1)).y/EARTH_RADIUS))+origin.latitude, (Math.toDegrees(nodesList.get(path.get(i+1)).x)/(EARTH_RADIUS*Math.cos(Math.toRadians(origin.latitude))))+origin.longitude));
             } else if(i!=path.size()-1&&i>1&&nodesList.get(path.get(i)).building==Build.OUT&&nodesList.get(path.get(i-1)).building==Build.OUT){
                 polylineOptions.endCap(new CustomCap(BitmapDescriptorFactory.fromResource(R.drawable.arrow), 1000));
                 polyline.add(mMap.addPolyline(polylineOptions));
-                Log.d("wtaf", "3");
             }
             if(i==path.size()-1&&i>1&&nodesList.get(path.get(i)).building==Build.OUT){
                 if(nodesList.get(path.get(i-1)).building!=Build.OUT)
                     polylineOptions.add(new LatLng((Math.toDegrees(nodesList.get(path.get(i)).y/EARTH_RADIUS))+origin.latitude, (Math.toDegrees(nodesList.get(path.get(i)).x)/(EARTH_RADIUS*Math.cos(Math.toRadians(origin.latitude))))+origin.longitude));
                 endMarker = mMap.addMarker(new MarkerOptions().position(new LatLng(Math.toDegrees(nodesList.get(endNode).y/EARTH_RADIUS)+origin.latitude, Math.toDegrees(nodesList.get(endNode).x/(Math.cos(Math.toRadians(origin.latitude))*EARTH_RADIUS))+origin.longitude)).icon(endIcon));
                 polyline.add(mMap.addPolyline(polylineOptions));
-                Log.d("wtaf", "4");
             }
         }
         if (nodesList.get(path.get(0)).building != Build.OUT) {
@@ -446,7 +419,6 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
                         startNode = buildings.get(Build.valueOf(intent.getStringExtra("building"))).center;
                     else
                         startNode = node1;
-                    Log.d("annow", startNode+" "+endNode);
                     startPath();
                 }
             });
@@ -500,8 +472,6 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
                         nearby.add(building1);
                     }
                 }
-                //In which building r u kinda vibe
-
             }
         });
         startMap.setOnClickListener(new View.OnClickListener() {
@@ -547,14 +517,12 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        // IMPORTANT NEED TO REMOVE EVENTUALLY
         boo = false;
         rating=false;
         mode = "browse";
         attributes = new ArrayList<>();
-
-
     }
+
     //first set of markers
     private Marker cbyMarker;
     private Marker steMarker;
@@ -593,44 +561,41 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         });
 
         mMap.setMapType(mMap.MAP_TYPE_HYBRID);
-        /* mMap.setMapStyle(
-                MapStyleOptions.loadRawResourceStyle(
-                        this, R.raw.map_style)); */
 
-        RelativeLayout layout = (RelativeLayout) findViewById(R.id.relative);
+        RelativeLayout layout = findViewById(R.id.relative);
         width = layout.getWidth();
         height = layout.getHeight();
         polyline = new ArrayList<>();
 
-        constraint = (ConstraintLayout) findViewById(R.id.constraint1);
+        constraint = findViewById(R.id.constraint1);
         constraint.setVisibility(View.INVISIBLE);
         pinDirections = findViewById(R.id.button17);
         pinDirections.setVisibility(View.INVISIBLE);
-        backBtn = (ImageButton) findViewById(R.id.imageView3);
-        buildingName = (TextView) findViewById(R.id.textView5);
-        direction = (Button) findViewById(R.id.button6);
-        inside = (Button) findViewById(R.id.button5);
-        cancel = (TextView)findViewById(R.id.textView14);
-        startMap = (Button) findViewById(R.id.button12);
-        startLocation = (Button) findViewById(R.id.button13);
-        clickMessage = (TextView)findViewById(R.id.textView19);
-        setStart = (Button)findViewById(R.id.button14);
+        backBtn =  findViewById(R.id.imageView3);
+        buildingName = findViewById(R.id.textView5);
+        direction = findViewById(R.id.button6);
+        inside = findViewById(R.id.button5);
+        cancel = findViewById(R.id.textView14);
+        startMap =  findViewById(R.id.button12);
+        startLocation =  findViewById(R.id.button13);
+        clickMessage = findViewById(R.id.textView19);
+        setStart = findViewById(R.id.button14);
         setStart.setVisibility(View.INVISIBLE);
-        cancelStart = (Button)findViewById(R.id.button16);
+        cancelStart = findViewById(R.id.button16);
         cancelStart.setVisibility(View.INVISIBLE);
-        next = (Button)findViewById(R.id.button9);
+        next = findViewById(R.id.button9);
         next.setVisibility(View.INVISIBLE);
-        back = (Button)findViewById(R.id.button8);
+        back = findViewById(R.id.button8);
         back.setVisibility(View.INVISIBLE);
         dropPin = findViewById(R.id.textView16);
         dropPin.setText("Drop Pin");
         pin = findViewById(R.id.imageButton7);
         pin.setEnabled(true);
-        backText = (TextView) findViewById(R.id.textView11);
+        backText =  findViewById(R.id.textView11);
         backText.setVisibility(View.INVISIBLE);
-        nextText = (TextView) findViewById(R.id.textView12);
+        nextText =  findViewById(R.id.textView12);
         nextText.setVisibility(View.INVISIBLE);
-        emergency = (ImageButton) findViewById(R.id.imageButton3);
+        emergency =  findViewById(R.id.imageButton3);
         emergency.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
@@ -685,7 +650,7 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
             }
         });
 
-        menuOptionsButton = (ImageButton) findViewById(R.id.menuBtn);
+        menuOptionsButton =  findViewById(R.id.menuBtn);
         final PopupMenu dropDownMenu = new PopupMenu(this, menuOptionsButton);
 
         final Menu menu = dropDownMenu.getMenu();
@@ -838,9 +803,9 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         subBtn = findViewById(R.id.submitBtn);
 
 
-        //mMap.setLatLngBoundsForCameraTarget(UOTTAWA);
-        //mMap.setMinZoomPreference(15);
-        //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(defaultLocation, 15));
+        mMap.setLatLngBoundsForCameraTarget(UOTTAWA);
+        mMap.setMinZoomPreference(15);
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(defaultLocation, 15));
 
 
         InputStream inputStream = getResources().openRawResource(R.raw.nodesdata);
@@ -864,13 +829,9 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         updateLocationUI();
         getDeviceLocation();
         googleMap.setOnMarkerClickListener(this);
-        //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(defaultLocation, DEFAULT_ZOOM));
 
         //srcSetupData();
         setView();
-        /*startNode = 11;
-        endNode = 5090;
-        startPath();*/
     } // End of the onMapReady
 
     private void getDeviceLocation() {
@@ -1029,12 +990,7 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
 
     //This is in the main class thingy lol
 
-    //public ListItem(String id, String name, int num)
-
     public void setupData(){
-
-        //Format of ListItem constructor
-        //public ListItem(String id, String name, String building, int floor, int num, int node) {
 
         //Buildings LatLng (LL) values
         LatLng cbyLL = new LatLng(45.419754, -75.679601);
@@ -1066,8 +1022,6 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         dir = new ListItem("building","D'Iorio","dir",1,8,-1, dirLL);
         tbt = new ListItem("building", "Tabaret Hall", "TBT", 1, 12, -1, tbtLL);
 
-
-        //HAVE TO ADD THE NODE NUMBERS TO ALL THE PLACES!!!!!!!!!!!
         //Places
         lpr = new ListItem("place", "Protection Services (LPR)", "OUT", 1,9, 5074, lprLL);
         hs = new ListItem("place", "Health Services", "OUT", 1, 10, 5076, hsLL);
@@ -1094,8 +1048,7 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
 
     public void setupList(){
 
-        // I believe this is already done ahead of time, but if it doesnt mess anything up, leave it in case
-        lst = (ListView) findViewById(R.id.theList);
+        lst = findViewById(R.id.theList);
 
         ListAdapter adapter = new ListAdapter(getApplicationContext(),0, itemsList);
         lst.setAdapter(adapter);
@@ -1108,7 +1061,6 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-                // fills this ListItem object with the one that was clicked
                 ListItem selectedItem = (ListItem) (lst.getItemAtPosition(position));
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(selectedItem.getCoords(), 17));
                 intent.putExtra("type", "browse");
@@ -1215,25 +1167,11 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
                 choosingStart = false;
                 startpath = false;
                 pin.setEnabled(true);
-                //Log.d("ratingTest",""+numStr);
                 cmt = cmtTxt.getText().toString();
-                //Log.d("ratingTest",cmt);
 
                 // for now the review only exists in the LogCat
                 feedback = "RATING: "+numStr+" STARS, COMMENT: "+cmt+" , For PATH from NODE "+startNode+" TO NODE "+endNode;
                 Log.d("rating", feedback);
-                //saveFeedback(feedback);
-                //Log.d("rating",sharedPreferences.getString(TEXT, ""));
-
-                /*
-                try {
-                    FileOutputStream fileOutputStream = openFileOutput(FILENAME, MODE_PRIVATE);
-                    fileOutputStream.write(review.getBytes());
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }*/
 
                 cmtTxt.getText().clear();
                 rateBr.setRating(0);
@@ -1242,20 +1180,6 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
             }
         });
     }
-
-    /*
-    public void saveFeedback(String feedback){
-
-        if(!sharedPreferences.contains(TEXT)){
-            editor.putString(TEXT,"");
-        }
-
-        if(sharedPreferences.getString(TEXT, "") != "") {
-            feedback = sharedPreferences.getString(TEXT, "")+"\n"+feedback;
-        }
-        editor.putString(TEXT,feedback);
-        editor.commit();
-    } */
 
     @Override
     protected void onResume() {
@@ -1283,5 +1207,4 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
             cancelStart.setVisibility(View.VISIBLE);
         }
     }
-  
-} //end of the whole thingy lol
+}
