@@ -15,10 +15,4 @@ public class Node {
 
     public double d;
     public int last;
-    public int rank;
-
-    public String toStr(){
-        String str = n+", "+floor+", "+building+", "+x+", "+y+", "+neighbour.toString()+", "+distance.toString();
-        return str;
-    }
 }
