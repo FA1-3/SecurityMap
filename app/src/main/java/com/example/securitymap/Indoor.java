@@ -90,9 +90,9 @@ public class Indoor extends AppCompatActivity {
                     if (nodes.get(path.get(k)).floor == nodes.get(path.get(k + 1)).floor && nodes.get(path.get(k)).floor == i) {
                         tempCanvas.drawLine((int) (ratio * (nodes.get(path.get(k)).x + tempFloor.ox)), (int) (ratio * (tempFloor.height - nodes.get(path.get(k)).y - tempFloor.oy)), (int) (ratio * (nodes.get(path.get(k + 1)).x + tempFloor.ox)), (int) (ratio * (tempFloor.height - nodes.get(path.get(k + 1)).y - tempFloor.oy)), myPaint);
                         if(k==0)
-                            tempCanvas.drawBitmap(MapsActivity.startMarkerBitmap, new Rect(0,0, 201, 201), new Rect((int)(ratio * (nodes.get(path.get(k)).x + tempFloor.ox))-58, (int) (ratio * (tempFloor.height - nodes.get(path.get(k)).y - tempFloor.oy))-116, (int)(ratio * (nodes.get(path.get(k)).x + tempFloor.ox))+58, (int) (ratio * (tempFloor.height - nodes.get(path.get(k)).y - tempFloor.oy))), null);
+                            tempCanvas.drawBitmap(MapsActivity.startMarkerBitmap, new Rect(0,0, 160, 160), new Rect((int)(ratio * (nodes.get(path.get(k)).x + tempFloor.ox))-58, (int) (ratio * (tempFloor.height - nodes.get(path.get(k)).y - tempFloor.oy))-116, (int)(ratio * (nodes.get(path.get(k)).x + tempFloor.ox))+58, (int) (ratio * (tempFloor.height - nodes.get(path.get(k)).y - tempFloor.oy))), null);
                         if(k==path.size() - 2)
-                            tempCanvas.drawBitmap(MapsActivity.endMarkerBitmap, new Rect(0,0, 201, 201), new Rect((int)(ratio * (nodes.get(path.get(k+1)).x + tempFloor.ox))-58, (int) (ratio * (tempFloor.height - nodes.get(path.get(k+1)).y - tempFloor.oy))-116, (int)(ratio * (nodes.get(path.get(k+1)).x + tempFloor.ox))+58, (int) (ratio * (tempFloor.height - nodes.get(path.get(k+1)).y - tempFloor.oy))), null);
+                            tempCanvas.drawBitmap(MapsActivity.endMarkerBitmap, new Rect(0,0, 137, 201), new Rect((int)(ratio * (nodes.get(path.get(k+1)).x + tempFloor.ox))-50, (int) (ratio * (tempFloor.height - nodes.get(path.get(k+1)).y - tempFloor.oy))-145, (int)(ratio * (nodes.get(path.get(k+1)).x + tempFloor.ox))+50, (int) (ratio * (tempFloor.height - nodes.get(path.get(k+1)).y - tempFloor.oy))), null);
                         if(k<path.size() - 2 && (nodes.get(path.get(k)).building != nodes.get(path.get(k + 2)).building||nodes.get(path.get(k + 2)).floor!=i)){
                             tempCanvas.save();
                             float x = (float)(ratio * (nodes.get(path.get(k + 1)).x + tempFloor.ox));
@@ -153,7 +153,7 @@ public class Indoor extends AppCompatActivity {
                 backBuilding = Build.NUL;
                 backFloor = -1;
             }
-            if(pathProgress!=Dijkstra.pathBuildings.size()-1){
+            if(pathProgress<Dijkstra.pathBuildings.size()-1){
                 nextBuilding=Dijkstra.pathBuildings.get(pathProgress+1);
                 nextFloor=Dijkstra.pathFloors.get(pathProgress+1);
                 nextProgress=pathProgress+1;
@@ -208,6 +208,26 @@ public class Indoor extends AppCompatActivity {
             next.setVisibility(View.INVISIBLE);
             nextText.setVisibility(View.INVISIBLE);
             directions.setVisibility(View.VISIBLE);
+            if(dropPin.getText()=="Remove Pin"){
+                pin.setVisibility(View.VISIBLE);
+                directions.setEnabled(true);
+            } else {
+                pin.setVisibility(View.INVISIBLE);
+                directions.setEnabled(false);
+            }
+            if(MapsActivity.choosingStart&&dropPin.getText()=="Remove Pin"){
+                setStart.setVisibility(View.VISIBLE);
+                cancelStart.setVisibility(View.VISIBLE);
+                setStart.setEnabled(true);
+            } else if(MapsActivity.choosingStart){
+                setStart.setVisibility(View.VISIBLE);
+                cancelStart.setVisibility(View.VISIBLE);
+                setStart.setEnabled(false);
+            } else {
+                setStart.setVisibility(View.INVISIBLE);
+                cancelStart.setVisibility(View.INVISIBLE);
+                setStart.setEnabled(false);
+            }
         }
     }
 
@@ -382,12 +402,17 @@ public class Indoor extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Dijkstra.pathProgress = nextProgress;
-
-                if(nextBuilding!=Build.OUT)
-                    setView(buildings.get(nextBuilding), nextFloor);
-                else {
-                    MapsActivity.boo = true;
+                if(next.getText()=="End"){
+                    MapsActivity.rating = true;
                     finish();
+                }else {
+
+                    if (nextBuilding != Build.OUT)
+                        setView(buildings.get(nextBuilding), nextFloor);
+                    else {
+                        MapsActivity.boo = true;
+                        finish();
+                    }
                 }
             }
         });

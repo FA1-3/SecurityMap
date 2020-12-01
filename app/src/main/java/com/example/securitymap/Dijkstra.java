@@ -41,7 +41,6 @@ public class Dijkstra {
             k=keys.nextElement();
             Node node = nodes.get(k);
             node.d = 100000000; //Distance de chaque point à partir du point de départ est "infinie"
-            node.rank = 0;        //Nombre d'étapes pour se rendre au point initialisé à 0
         }
 
         nodes.get(start).d=0;
@@ -65,7 +64,6 @@ public class Dijkstra {
                         } else {
                             neighbour.d = evaluation.d + evaluation.distance.get(i);//changer la distance du voisin pour la nouvelle dist
                             neighbour.last = eval; //le point précédent au voisin dans le trajet le plus court est le point considéré
-                            neighbour.rank = evaluation.rank + 1;//le nombre d'étapes pour ce rendre au voisin est le # d'étapes au point+1
                             if (!unsettled.contains(evaluation.neighbour.get(i))) //si le voisin n'est pas déjà dans unsettled, ajoute le
                                 unsettled.add(evaluation.neighbour.get(i));
                         }
@@ -74,10 +72,13 @@ public class Dijkstra {
             }
         }
         path.add(end);
-        for(int i=1; i<=nodes.get(end).rank; i++){ //pour déterminer le trajet, en commenceant avec le point d'arrivé, prendre le dernier point qui donne le trajet le plus court
+        int i=0;
+        while (nodes.get(path.get(i)).last!=start){ //pour déterminer le trajet, en commenceant avec le point d'arrivé, prendre le dernier point qui donne le trajet le plus court
                                                     //au point
-            path.add(nodes.get(path.get(i-1)).last);
+            path.add(nodes.get(path.get(i)).last);
+            i++;
         }
+        path.add(start);
         path = reverse(path);
 
         pathBuildings = new ArrayList<>();

@@ -294,9 +294,12 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
             if(choosingStart) {
                 setStart.setVisibility(View.VISIBLE);
                 cancelStart.setVisibility(View.VISIBLE);
+                backBtn.performClick();
             }
             if(dropPin.getText().equals("Remove Pin"))
                 pinDirections.setVisibility(View.VISIBLE);
+            else
+                pin.setEnabled(true);
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(defaultLocation, 15));
             rateLyt.setVisibility(View.INVISIBLE);
             constraint.setVisibility(View.INVISIBLE);
@@ -382,10 +385,6 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         return y;
     }
     public void launchPreview(){
-        if(dropPin.getText().equals("Remove Pin")) {
-            pin.performClick();
-        }
-        pin.setEnabled(false);
 
         constraint.setVisibility(View.VISIBLE);
         cancel.setVisibility(View.INVISIBLE);
@@ -410,7 +409,12 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
             setStart.setVisibility(View.INVISIBLE);
             cancelStart.setVisibility(View.INVISIBLE);
             pinDirections.setVisibility(View.INVISIBLE);
+            pin.setEnabled(false);
         } else {
+            if(dropPin.getText().equals("Remove Pin")) {
+                pin.performClick();
+            }
+            pin.setEnabled(false);
             setStart.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -429,11 +433,6 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
             public void onClick(View v) {
                 setStart.setVisibility(View.INVISIBLE);
                 cancelStart.setVisibility(View.INVISIBLE);
-                int node1 = intent.getIntExtra("node", -1);
-                if(node1==-1)
-                    endNode = buildings.get(Build.valueOf(intent.getStringExtra("building"))).center;
-                else
-                    endNode = node1;
                 clickMessage.setVisibility(View.VISIBLE);
                 cancel.setVisibility(View.VISIBLE);
                 startMap.setVisibility(View.VISIBLE);
@@ -459,6 +458,14 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         startLocation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                /*
+                setStart.setVisibility(View.INVISIBLE);
+                cancelStart.setVisibility(View.INVISIBLE);
+                int node1 = intent.getIntExtra("node", -1);
+                if(node1==-1)
+                    endNode = buildings.get(Build.valueOf(intent.getStringExtra("building"))).center;
+                else
+                    endNode = node1;
                 ArrayList<Building> nearby = new ArrayList<>();
                 double[] pt1 = {getX(lastKnownLocation.getLongitude()), getY(lastKnownLocation.getLatitude())};
                 Enumeration<Build> keys = buildings.keys();
@@ -471,12 +478,27 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
                     if(sqrt(pow((pt1[0]-pt2[0]),2)+pow((pt1[1]-pt2[1]),2))<65){
                         nearby.add(building1);
                     }
-                }
+                }*/
             }
         });
         startMap.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                setStart.setVisibility(View.INVISIBLE);
+                cancelStart.setVisibility(View.INVISIBLE);
+                if (intent.getStringExtra("name").equals("Custom Marker")){
+                    choosingStart = true;
+                    pinMarker.setDraggable(false);
+                    setStart.setVisibility(View.VISIBLE);
+                    setStart.setEnabled(false);
+                    cancelStart.setVisibility(View.VISIBLE);
+                } else {
+                    int node1 = intent.getIntExtra("node", -1);
+                    if (node1 == -1)
+                        endNode = buildings.get(Build.valueOf(intent.getStringExtra("building"))).center;
+                    else
+                        endNode = node1;
+                }
                 choosingStart=true;
                 pin.setEnabled(true);
                 constraint.setVisibility(View.INVISIBLE);
@@ -623,13 +645,8 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
                     pinDirections.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            endNode = getClosestNode(pinMarker.getPosition());
                             intent.putExtra("name", "Custom Marker");
-                            choosingStart = true;
-                            pinMarker.setDraggable(false);
-                            setStart.setVisibility(View.VISIBLE);
-                            setStart.setEnabled(false);
-                            cancelStart.setVisibility(View.VISIBLE);
+                            endNode = getClosestNode(pinMarker.getPosition());
                             launchPreview();
                         }
                     });
@@ -693,7 +710,7 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         origin = new LatLng(45.419513, -75.678796);
 
         Bitmap a = BitmapFactory.decodeResource(getResources(), R.drawable.endmarkericon);
-        startMarkerBitmap = Bitmap.createScaledBitmap(a, 201, 201, false);
+        startMarkerBitmap = Bitmap.createScaledBitmap(a, 160, 160, false);
         startIcon = BitmapDescriptorFactory.fromBitmap(startMarkerBitmap);
 
         Bitmap q = BitmapFactory.decodeResource(getResources(), R.drawable.end_marker_1);
@@ -1153,6 +1170,19 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         setStart.setVisibility(View.INVISIBLE);
         cancelStart.setVisibility(View.INVISIBLE);
         constraint.setVisibility(View.INVISIBLE);
+        back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (nodesList.get(path.get(Dijkstra.pathBuildings.size()-1)).building != Build.OUT) {
+                    intent.putExtra("type", "path");
+                    intent.putExtra("building", String.valueOf(nodesList.get(path.get(0)).building));
+                    intent.putExtra("floor", nodesList.get(path.get(0)).floor);
+                    startActivity(intent);
+                } else {
+                    setView();
+                }
+            }
+        });
         // what happens when the user clicks the SUBMIT button after giving feedback
         subBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -1205,6 +1235,7 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
             setStart.setVisibility(View.VISIBLE);
             setStart.setEnabled(false);
             cancelStart.setVisibility(View.VISIBLE);
+            constraint.setVisibility(View.INVISIBLE);
         }
     }
 }
