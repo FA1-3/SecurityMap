@@ -113,8 +113,9 @@ public class Indoor extends AppCompatActivity {
                             tempCanvas.drawBitmap(MapsActivity.arrow, new Rect(0,0,201,201), new Rect((int)(x-(height/2)), (int)(y-(height/2)), (int)(x+(height/2)), (int)(y+(height/2))), null);
                             tempCanvas.restore();
                         }
-
                     }
+                } if(k>0&&nodes.get(path.get(k)).building == building.name && nodes.get(path.get(k)).floor == i &&(nodes.get(path.get(k-1)).building != building.name || nodes.get(path.get(k-1)).floor != i)&&(nodes.get(path.get(k+1)).building != building.name || nodes.get(path.get(k+1)).floor != i)){
+                    tempCanvas.drawCircle((int) (ratio * (nodes.get(path.get(k)).x + tempFloor.ox)), (int) (ratio * (tempFloor.height - nodes.get(path.get(k)).y - tempFloor.oy)), 10, myPaint);
                 }
             }
             floorBitmaps.add(tempBitmap);
@@ -194,6 +195,7 @@ public class Indoor extends AppCompatActivity {
                     @Override
                     public void onClick(View v) {
                         MapsActivity.rating = true;
+                        Dijkstra.pathProgress = Dijkstra.pathBuildings.size()-1;
                         finish();
                     }
                 });

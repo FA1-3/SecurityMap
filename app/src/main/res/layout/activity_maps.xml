@@ -295,12 +295,13 @@
         -->
     <ImageButton
         android:id="@+id/imageButton7"
-        android:layout_width="35dp"
+        android:layout_width="31dp"
         android:layout_height="50dp"
         android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
         android:layout_marginEnd="10dp"
         android:layout_marginBottom="350dp"
+        android:adjustViewBounds="true"
         android:background="#00FFFFFF"
         android:foreground="@drawable/marker"
         android:rotation="0"

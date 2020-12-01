@@ -413,6 +413,7 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         } else {
             if(dropPin.getText().equals("Remove Pin")) {
                 pin.performClick();
+                setStart.setEnabled(true);
             }
             pin.setEnabled(false);
             setStart.setOnClickListener(new View.OnClickListener() {
@@ -487,7 +488,6 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
                 setStart.setVisibility(View.INVISIBLE);
                 cancelStart.setVisibility(View.INVISIBLE);
                 if (intent.getStringExtra("name").equals("Custom Marker")){
-                    choosingStart = true;
                     pinMarker.setDraggable(false);
                     setStart.setVisibility(View.VISIBLE);
                     setStart.setEnabled(false);
@@ -1031,13 +1031,13 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         cby = new ListItem("building","Colonel By","cby",1,0,-1, cbyLL);
         ste = new ListItem("building","SITE","ste",1,1,-1, steLL);
         stm = new ListItem("building","STEM","stm",2,2,-1, stmLL);
-        mrn = new ListItem("building","Marion","mrn",1,3,-1, mrnLL);
-        hml = new ListItem("building","Hamelin","hml",1,4,-1, hmlLL);
-        crx = new ListItem("building","Learning Crossroads","crx",-1,5,-1, crxLL);
+        mrn = new ListItem("building","Marion","mrn",1,3,5024, mrnLL);
+        hml = new ListItem("building","Hamelin","hml",1,4,5087, hmlLL);
+        crx = new ListItem("building","Learning Crossroads","crx",-1,5,5091, crxLL);
         van = new ListItem("building","Vanier Hall","vnr",1,6,-1, vanLL);
         ftx = new ListItem("building","Fauteux","ftx",1,7,-1, ftxLL);
         dir = new ListItem("building","D'Iorio","dir",1,8,-1, dirLL);
-        tbt = new ListItem("building", "Tabaret Hall", "TBT", 1, 12, -1, tbtLL);
+        tbt = new ListItem("building", "Tabaret Hall", "TBT", 1, 12, 5090, tbtLL);
 
         //Places
         lpr = new ListItem("place", "Protection Services (LPR)", "OUT", 1,9, 5074, lprLL);
@@ -1170,15 +1170,30 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         setStart.setVisibility(View.INVISIBLE);
         cancelStart.setVisibility(View.INVISIBLE);
         constraint.setVisibility(View.INVISIBLE);
+        next.setText("End");
+        nextText.setVisibility(View.INVISIBLE);
+        next.setEnabled(false);
+        if(Dijkstra.pathBuildings.size()>0){
+            back.setEnabled(true);
+            backText.setVisibility(View.VISIBLE);
+            if(Dijkstra.pathBuildings.get(Dijkstra.pathBuildings.size()-1)!=Build.OUT)
+                backText.setText(Dijkstra.pathBuildings.get(Dijkstra.pathBuildings.size()-1) + " Floor " + (Dijkstra.pathFloors.get(Dijkstra.pathFloors.size()-1)));
+            else
+                backText.setText("Exterior");
+        }
         back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (nodesList.get(path.get(Dijkstra.pathBuildings.size()-1)).building != Build.OUT) {
+                Dijkstra.pathProgress = Dijkstra.pathBuildings.size()-1;
+                if (Dijkstra.pathBuildings.get(Dijkstra.pathBuildings.size()-1) != Build.OUT) {
                     intent.putExtra("type", "path");
-                    intent.putExtra("building", String.valueOf(nodesList.get(path.get(0)).building));
-                    intent.putExtra("floor", nodesList.get(path.get(0)).floor);
+                    intent.putExtra("building", String.valueOf(nodesList.get(path.get(Dijkstra.path.size()-1)).building));
+                    intent.putExtra("floor", nodesList.get(path.get(Dijkstra.path.size()-1)).floor);
                     startActivity(intent);
                 } else {
+                    mode = "path";
+                    pathProgress = Dijkstra.pathProgress;
+                    next.setEnabled(true);
                     setView();
                 }
             }
@@ -1196,8 +1211,11 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
                 boo = false;
                 choosingStart = false;
                 startpath = false;
+                rating = false;
                 pin.setEnabled(true);
                 cmt = cmtTxt.getText().toString();
+                if (dropPin.getText().equals("Remove Pin"))
+                    pin.performClick();
 
                 // for now the review only exists in the LogCat
                 feedback = "RATING: "+numStr+" STARS, COMMENT: "+cmt+" , For PATH from NODE "+startNode+" TO NODE "+endNode;
@@ -1232,6 +1250,7 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         else if(startpath)
             startPath();
         else if(choosingStart){
+            pin.setEnabled(true);
             setStart.setVisibility(View.VISIBLE);
             setStart.setEnabled(false);
             cancelStart.setVisibility(View.VISIBLE);
