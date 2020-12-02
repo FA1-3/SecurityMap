@@ -118,6 +118,9 @@ public class Indoor extends AppCompatActivity {
                     tempCanvas.drawCircle((int) (ratio * (nodes.get(path.get(k)).x + tempFloor.ox)), (int) (ratio * (tempFloor.height - nodes.get(path.get(k)).y - tempFloor.oy)), 10, myPaint);
                 }
             }
+            if(nodes.get(path.get(path.size()-1)).building == building.name && nodes.get(path.get(path.size()-1)).floor == i &&(nodes.get(path.get(path.size()-2)).building != building.name || nodes.get(path.get(path.size()-2)).floor != i)) {
+                tempCanvas.drawBitmap(MapsActivity.endMarkerBitmap, new Rect(0,0, 137, 201), new Rect((int)(ratio * (nodes.get(path.get(path.size()-1)).x + tempFloor.ox))-50, (int) (ratio * (tempFloor.height - nodes.get(path.get(path.size()-1)).y - tempFloor.oy))-145, (int)(ratio * (nodes.get(path.get(path.size()-1)).x + tempFloor.ox))+50, (int) (ratio * (tempFloor.height - nodes.get(path.get(path.size()-1)).y - tempFloor.oy))), null);
+            }
             floorBitmaps.add(tempBitmap);
         }
     }
