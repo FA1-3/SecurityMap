@@ -411,7 +411,6 @@ public class Indoor extends AppCompatActivity {
                     MapsActivity.rating = true;
                     finish();
                 }else {
-
                     if (nextBuilding != Build.OUT)
                         setView(buildings.get(nextBuilding), nextFloor);
                     else {

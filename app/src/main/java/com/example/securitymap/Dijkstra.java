@@ -40,7 +40,7 @@ public class Dijkstra {
         while(keys.hasMoreElements()) {
             k=keys.nextElement();
             Node node = nodes.get(k);
-            node.d = 100000000; //Distance de chaque point à partir du point de départ est "infinie"
+            node.d = Integer.MAX_VALUE; //Distance de chaque point à partir du point de départ est "infinie"
         }
 
         nodes.get(start).d=0;
@@ -54,18 +54,41 @@ public class Dijkstra {
                 Node neighbour = nodes.get(evaluation.neighbour.get(i));
                 if((!att.contains(evaluation.att[0])&&!att.contains(evaluation.att[1]))||(!att.contains(neighbour.att[0])&&!att.contains(neighbour.att[1])))
                 if (neighbour.att[0] != Attribute.BUILDING && neighbour.att[1] != Attribute.BUILDING || neighbour.n==end) {
-                    if ((!settled.contains(evaluation.neighbour.get(i))) &&  //si point n'a pas été déjà visité
-                            (evaluation.d + evaluation.distance.get(i) < neighbour.d) && //si distance (d) du voisin est plus grande
-                            //que la distance du point évalué + la distance entre ce point et le voisin
-                            (evaluation.d + evaluation.distance.get(i) < nodes.get(end).d)) { //et si cette dernière distance est plus petite que la plus petite
-                        //distance calculée à date au point d'arrivé
-                        if ((att.contains(neighbour.att[0]) || att.contains(neighbour.att[1])) && (att.contains(evaluation.att[0]) || att.contains(evaluation.att[1]))) {
-                            neighbour.d = 1000000000;
-                        } else {
-                            neighbour.d = evaluation.d + evaluation.distance.get(i);//changer la distance du voisin pour la nouvelle dist
-                            neighbour.last = eval; //le point précédent au voisin dans le trajet le plus court est le point considéré
-                            if (!unsettled.contains(evaluation.neighbour.get(i))) //si le voisin n'est pas déjà dans unsettled, ajoute le
-                                unsettled.add(evaluation.neighbour.get(i));
+                    if(MapsActivity.warmest){
+                        if (!settled.contains(neighbour.n)) {
+                            if (evaluation.building == Build.OUT || neighbour.building == Build.OUT && (evaluation.d + evaluation.distance.get(i) < neighbour.d) &&(evaluation.d + evaluation.distance.get(i) < nodes.get(end).d)){
+                                if ((att.contains(neighbour.att[0]) || att.contains(neighbour.att[1])) && (att.contains(evaluation.att[0]) || att.contains(evaluation.att[1]))) {
+                                    neighbour.d = Integer.MAX_VALUE;
+                                } else {
+                                    neighbour.d = evaluation.d + evaluation.distance.get(i);//changer la distance du voisin pour la nouvelle dist
+                                    neighbour.last = eval; //le point précédent au voisin dans le trajet le plus court est le point considéré
+                                    if (!unsettled.contains(neighbour.n)) //si le voisin n'est pas déjà dans unsettled, ajoute le
+                                        unsettled.add(neighbour.n);
+                                }
+                            } else if (evaluation.building != Build.OUT && neighbour.building != Build.OUT && (evaluation.d < neighbour.d) && (evaluation.d < nodes.get(end).d)){
+                                if ((att.contains(neighbour.att[0]) || att.contains(neighbour.att[1])) && (att.contains(evaluation.att[0]) || att.contains(evaluation.att[1]))) {
+                                    neighbour.d = Integer.MAX_VALUE;
+                                } else {
+                                    neighbour.d = evaluation.d;//changer la distance du voisin pour la nouvelle dist
+                                    neighbour.last = eval; //le point précédent au voisin dans le trajet le plus court est le point considéré
+                                    if (!unsettled.contains(neighbour.n)) //si le voisin n'est pas déjà dans unsettled, ajoute le
+                                        unsettled.add(neighbour.n);
+                                }
+                            }
+                        }
+                    } else {
+                        if ((!settled.contains(neighbour.n)) &&  //si point n'a pas été déjà visité
+                                (evaluation.d + evaluation.distance.get(i) < neighbour.d) && //si distance (d) du voisin est plus grande
+                                (evaluation.d + evaluation.distance.get(i) < nodes.get(end).d)) { //et si cette dernière distance est plus petite que la plus petite
+                            //distance calculée à date au point d'arrivé
+                            if ((att.contains(neighbour.att[0]) || att.contains(neighbour.att[1])) && (att.contains(evaluation.att[0]) || att.contains(evaluation.att[1]))) {
+                                neighbour.d = Integer.MAX_VALUE;
+                            } else {
+                                neighbour.d = evaluation.d + evaluation.distance.get(i);//changer la distance du voisin pour la nouvelle dist
+                                neighbour.last = eval; //le point précédent au voisin dans le trajet le plus court est le point considéré
+                                if (!unsettled.contains(neighbour.n)) //si le voisin n'est pas déjà dans unsettled, ajoute le
+                                    unsettled.add(neighbour.n);
+                            }
                         }
                     }
                 }

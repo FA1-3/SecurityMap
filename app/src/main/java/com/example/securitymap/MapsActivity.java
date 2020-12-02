@@ -115,6 +115,7 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
     static Bitmap startMarkerBitmap;
     static Bitmap endMarkerBitmap;
     static Bitmap arrow;
+    static boolean warmest;
 
     private ImageButton searchBtn; //this is the button to pop open the search and list window
 
@@ -375,15 +376,6 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
         }
     }
 
-    public double getX(double longitude){
-        double x = EARTH_RADIUS*cos(origin.latitude);
-        x = x*(longitude-origin.longitude)*PI/180;
-        return x;
-    }
-    public double getY(double latitude){
-        double y = EARTH_RADIUS*(latitude-origin.latitude)*PI/180;
-        return y;
-    }
     public void launchPreview(){
 
         constraint.setVisibility(View.VISIBLE);
@@ -674,26 +666,23 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
 
         menu.add(0, 0, 0, "Reduced Mobility");
         menu.add(0, 1, 0, "Warmest");
-        menu.add(0, 2, 0, "None");
 
-        menu.setGroupCheckable(0, true, true);
+        menu.setGroupCheckable(0, true, false);
 
         dropDownMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                item.setChecked(true);
+                item.setChecked(!item.isChecked());
                 switch (item.getItemId()) {
                     case 0:
-                        // "Mobilité réduite" was selected -> computes shortest path accordingly;
-                        if(!attributes.contains(Attribute.STAIR))
-                            attributes.add(Attribute.STAIR);
+                        if(item.isChecked()) {
+                            if (!attributes.contains(Attribute.STAIR))
+                                attributes.add(Attribute.STAIR);
+                        } else
+                            attributes.remove(Attribute.STAIR);
                         return true;
                     case 1:
-                        // "Chemin le plus chaud" was selected -> computes shortest path accordingly
-                        return true;
-                    case 2:
-                        // "Déplacement libre" was selected -> computes shortest path accordingly
-                        attributes.remove(Attribute.STAIR);
+                        warmest = item.isChecked();
                         return true;
                 }
                 return false;
@@ -1177,7 +1166,7 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
             back.setEnabled(true);
             backText.setVisibility(View.VISIBLE);
             if(Dijkstra.pathBuildings.get(Dijkstra.pathBuildings.size()-1)!=Build.OUT)
-                backText.setText(Dijkstra.pathBuildings.get(Dijkstra.pathBuildings.size()-1) + buildings.get(Dijkstra.pathBuildings.get(Dijkstra.pathBuildings.size()-1)).floors.get(Dijkstra.pathFloors.get(Dijkstra.pathFloors.size()-1)).name);
+                backText.setText(Dijkstra.pathBuildings.get(Dijkstra.pathBuildings.size()-1) +" "+ buildings.get(Dijkstra.pathBuildings.get(Dijkstra.pathBuildings.size()-1)).floors.get(Dijkstra.pathFloors.get(Dijkstra.pathFloors.size()-1)).name);
             else
                 backText.setText("Exterior");
         }
