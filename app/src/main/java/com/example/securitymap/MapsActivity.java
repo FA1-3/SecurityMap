@@ -228,7 +228,7 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
                 backText.setVisibility(View.VISIBLE);
                 back.setEnabled(true);
                 if (backBuilding != Build.OUT)
-                    backText.setText(backBuilding + " Floor " + backFloor);
+                    backText.setText(backBuilding +" "+ buildings.get(backBuilding).floors.get(backFloor).name);
                 else
                     backText.setText("Exterior");
             } else {
@@ -242,7 +242,7 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
                 next.setText("Next");
                 next.setEnabled(true);
                 if (nextBuilding != Build.OUT)
-                    nextText.setText(nextBuilding + " Floor " + nextFloor);
+                    nextText.setText(nextBuilding +" "+ buildings.get(nextBuilding).floors.get(nextFloor).name);
                 else
                     nextText.setText("Exterior");
             } else {
@@ -1177,7 +1177,7 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
             back.setEnabled(true);
             backText.setVisibility(View.VISIBLE);
             if(Dijkstra.pathBuildings.get(Dijkstra.pathBuildings.size()-1)!=Build.OUT)
-                backText.setText(Dijkstra.pathBuildings.get(Dijkstra.pathBuildings.size()-1) + " Floor " + (Dijkstra.pathFloors.get(Dijkstra.pathFloors.size()-1)));
+                backText.setText(Dijkstra.pathBuildings.get(Dijkstra.pathBuildings.size()-1) + buildings.get(Dijkstra.pathBuildings.get(Dijkstra.pathBuildings.size()-1)).floors.get(Dijkstra.pathFloors.get(Dijkstra.pathFloors.size()-1)).name);
             else
                 backText.setText("Exterior");
         }

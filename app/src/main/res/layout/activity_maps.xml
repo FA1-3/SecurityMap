@@ -400,7 +400,7 @@
         android:layout_marginEnd="0dp"
         android:layout_marginBottom="250dp"
         android:background="@drawable/feedback_bg"
-        android:visibility="gone">
+        android:visibility="visible">
 
         <TextView
             android:id="@+id/rateUsTxt"
@@ -430,7 +430,7 @@
             android:layout_width="0dp"
             android:layout_height="135dp"
             android:ems="10"
-            android:hint="Please tell us about your naviguation experience!"
+            android:hint="Please tell us about your navigation experience!"
             android:inputType="textPersonName"
             android:textColor="#000000"
             app:layout_constraintEnd_toEndOf="parent"
