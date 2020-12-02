@@ -698,8 +698,8 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
 
         origin = new LatLng(45.419513, -75.678796);
 
-        Bitmap a = BitmapFactory.decodeResource(getResources(), R.drawable.endmarkericon);
-        startMarkerBitmap = Bitmap.createScaledBitmap(a, 160, 160, false);
+        Bitmap a = BitmapFactory.decodeResource(getResources(), R.drawable.star_icon);
+        startMarkerBitmap = Bitmap.createScaledBitmap(a, 126, 180, false);
         startIcon = BitmapDescriptorFactory.fromBitmap(startMarkerBitmap);
 
         Bitmap q = BitmapFactory.decodeResource(getResources(), R.drawable.end_marker_1);
