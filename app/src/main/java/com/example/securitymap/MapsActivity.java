@@ -480,7 +480,7 @@ public class MapsActivity<UOTTAWA> extends FragmentActivity implements OnMapRead
                 setStart.setVisibility(View.INVISIBLE);
                 cancelStart.setVisibility(View.INVISIBLE);
                 if (intent.getStringExtra("name").equals("Custom Marker")){
-                    pinMarker.setDraggable(false);
+                    pin.performClick();
                     setStart.setVisibility(View.VISIBLE);
                     setStart.setEnabled(false);
                     cancelStart.setVisibility(View.VISIBLE);
